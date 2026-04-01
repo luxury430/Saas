@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraSec | Enterprise Settings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030303; /* Deeper OLED black */
+            color: #e5e5e5;
+            overflow: hidden; /* Prevent body scroll, handle scroll in main area */
+        }
+
+        /* Custom Premium Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        /* Smooth Reveal Animations */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out forwards;
+        }
+        
+        .tab-content.active-tab {
+            display: block;
+        }
+
+        .reveal {
+            opacity: 0;
+            will-change: opacity, transform;
+        }
+
+        .reveal.active {
+            animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Glassmorphism Components */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .glass-panel:hover {
+            border-color: rgba(99, 102, 241, 0.2);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        /* Toggles */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #6366f1;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #6366f1;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-indigo-500/30 selection:text-indigo-200 flex h-screen">
+
+    <div class="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[150px] pointer-events-none z-0"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[150px] pointer-events-none z-0"></div>
+
+    <aside class="w-72 border-r border-white/5 bg-black/40 backdrop-blur-2xl flex flex-col z-20 h-full">
+        <div class="p-6 md:p-8">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.4)]">
+                    <i class="ph-bold ph-shield-check text-white text-xl"></i>
+                </div>
+                <h1 class="font-bold text-xl tracking-wide text-white">Neuro<span class="text-indigo-400">Forge</span></h1>
+            </div>
+            <p class="text-xs text-gray-500 font-medium tracking-wider uppercase mt-8 mb-4 px-2">Settings Menu</p>
+            
+            <nav class="space-y-1" id="nav-menu">
+                <button data-target="profile" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 transition-all font-medium">
+                    <i class="ph ph-user-circle text-xl"></i> Personal Profile
+                </button>
+                <button data-target="ai-vendors" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all font-medium">
+                    <i class="ph ph-cpu text-xl"></i> AI Vendors & Models
+                </button>
+                <button data-target="security" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all font-medium">
+                    <i class="ph ph-lock-key text-xl"></i> Security & Access
+                </button>
+                <button data-target="billing" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all font-medium">
+                    <i class="ph ph-credit-card text-xl"></i> Billing & Usage
+                </button>
+                <button data-target="preferences" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all font-medium">
+                    <i class="ph ph-sliders-horizontal text-xl"></i> Preferences
+                </button>
+            </nav>
+        </div>
+
+        <div class="mt-auto p-6">
+            <button data-target="danger" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 hover:border-red-500/20 border border-transparent transition-all font-medium">
+                <i class="ph ph-warning-circle text-xl"></i> Danger Zone
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 h-full overflow-y-auto relative z-10 scroll-smooth pb-32">
+        <div class="max-w-4xl mx-auto p-8 md:p-12 lg:p-16">
+
+            <section id="profile" class="tab-content active-tab space-y-8">
+                <header class="mb-10 reveal">
+                    <h2 class="text-3xl font-bold text-white mb-2">Personal Profile</h2>
+                    <p class="text-gray-400">Manage your personal information and dashboard identity.</p>
+                </header>
+
+                <div class="glass-panel rounded-2xl p-8 reveal">
+                    <div class="flex items-center gap-6 mb-8">
+                        <div class="w-24 h-24 rounded-full bg-gray-800 border-2 border-indigo-500/50 flex items-center justify-center overflow-hidden relative group cursor-pointer">
+                            <span class="text-3xl font-bold text-gray-400 group-hover:hidden">AM</span>
+                            <div class="absolute inset-0 bg-black/60 hidden group-hover:flex items-center justify-center backdrop-blur-sm transition-all">
+                                <i class="ph ph-camera text-white text-2xl"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <button class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-white/5">Upload Avatar</button>
+                            <p class="text-xs text-gray-500 mt-2">JPG, GIF or PNG. Max size of 800K</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-gray-400">First Name</label>
+                            <input type="text" value="Alex" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-gray-400">Last Name</label>
+                            <input type="text" value="Mercer" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+                        </div>
+                        <div class="space-y-2 md:col-span-2">
+                            <label class="text-sm font-medium text-gray-400">Email Address</label>
+                            <input type="email" value="alex@aurasec.ai" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+                        </div>
+                        <div class="space-y-2 md:col-span-2">
+                            <label class="text-sm font-medium text-gray-400">Job Title / Role</label>
+                            <input type="text" value="Lead AI Security Engineer" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+                        </div>
+                    </div>
+                      <div class="space-y-2 md:col-span-2">
+                            <label class="text-sm font-medium text-gray-400">You are using this as</label>
+                            <input type="text" value=" Enterprenuer " class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+                        </div>
+                    </div>
+                    <div class="flex justify-end mt-8">
+                        <button class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-6 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-500/20">Save Profile</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ai-vendors" class="tab-content space-y-8">
+                <header class="mb-10 reveal">
+                    <h2 class="text-3xl font-bold text-white mb-2">AI Vendors & Models</h2>
+                    <p class="text-gray-400">Configure allowed AI models and set enterprise data masking rules.</p>
+                </header>
+
+                <div class="glass-panel rounded-2xl p-8 reveal">
+                    <h3 class="text-lg font-semibold text-white mb-6 border-b border-white/10 pb-4">Data Loss Prevention (DLP)</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="text-white font-medium">PII Auto-Masking</h4>
+                                <p class="text-sm text-gray-400">Automatically redact emails, SSNs, and phone numbers before sending prompts to vendors.</p>
+                            </div>
+                            <div class="relative inline-block w-12 align-middle select-none">
+                                <input type="checkbox" id="t-pii" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10" checked/>
+                                <label for="t-pii" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="text-white font-medium">Block Source Code Transmission</h4>
+                                <p class="text-sm text-gray-400">Prevent proprietary code blocks from being processed by external LLMs.</p>
+                            </div>
+                            <div class="relative inline-block w-12 align-middle select-none">
+                                <input type="checkbox" id="t-code" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10"/>
+                                <label for="t-code" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-8 reveal">
+                    <h3 class="text-lg font-semibold text-white mb-6 border-b border-white/10 pb-4">Approved Vendors</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between bg-black/40 p-4 rounded-xl border border-white/5">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center">🤖</div>
+                                <div>
+                                    <p class="text-white font-medium">OpenAI</p>
+                                    <p class="text-xs text-gray-400">GPT-4 Turbo, GPT-3.5</p>
+                                </div>
+                            </div>
+                            <span class="text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20">Active</span>
+                        </div>
+                        <div class="flex items-center justify-between bg-black/40 p-4 rounded-xl border border-white/5 opacity-60">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center">🧠</div>
+                                <div>
+                                    <p class="text-white font-medium">Anthropic</p>
+                                    <p class="text-xs text-gray-400">Claude 3 Opus, Sonnet</p>
+                                </div>
+                            </div>
+                            <button class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">Enable Integration</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="security" class="tab-content space-y-8">
+                <header class="mb-10 reveal">
+                    <h2 class="text-3xl font-bold text-white mb-2">Security & Access</h2>
+                    <p class="text-gray-400">Manage credentials, API keys, and device sessions.</p>
+                </header>
+
+                <div class="glass-panel rounded-2xl p-8 reveal">
+                    <div class="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
+                        <h3 class="text-lg font-semibold text-white">API Keys</h3>
+                        <button class="text-sm bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg transition-colors">Generate New Key</button>
+                    </div>
+                    <div class="bg-black/50 border border-white/5 rounded-xl p-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-400 mb-1">Production Key</p>
+                            <p class="font-mono text-white tracking-wider">sk-aura-••••••••••••••••8f92</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="p-2 text-gray-400 hover:text-white transition-colors"><i class="ph ph-copy text-lg"></i></button>
+                            <button class="p-2 text-gray-400 hover:text-red-400 transition-colors"><i class="ph ph-trash text-lg"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-8 reveal">
+                    <h3 class="text-lg font-semibold text-white mb-6 border-b border-white/10 pb-4">Authentication</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="text-white font-medium">Two-Factor Authentication (2FA)</h4>
+                                <p class="text-sm text-gray-400">Secure your account using an authenticator app.</p>
+                            </div>
+                            <button class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-4 py-2 rounded-lg text-sm font-medium">Enabled</button>
+                        </div>
+                        <div class="pt-4">
+                            <button class="text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors">Change Password</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="billing" class="tab-content space-y-8">
+                <header class="mb-10 reveal">
+                    <h2 class="text-3xl font-bold text-white mb-2">Billing & Usage</h2>
+                    <p class="text-gray-400">Monitor your API quota and manage your subscription.</p>
+                </header>
+
+                <div class="glass-panel rounded-2xl p-8 reveal">
+                    <h3 class="text-lg font-semibold text-white mb-6">Current Cycle Usage</h3>
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-gray-400">Security Scans Analyzed</span>
+                        <span class="text-white font-medium">842,000 / 1,000,000</span>
+                    </div>
+                    <div class="w-full bg-gray-800 rounded-full h-2.5 mb-2 overflow-hidden">
+                        <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2.5 rounded-full" style="width: 84%"></div>
+                    </div>
+                    <p class="text-xs text-gray-500">Resets in 12 days on Nov 1st.</p>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-1 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 reveal">
+                    <div class="bg-[#080808] rounded-[15px] p-8">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6">
+                            <div>
+                                <h4 class="text-2xl font-bold text-white mb-1">Enterprise Tier</h4>
+                                <p class="text-sm text-gray-400">$499/month • Billed Annually</p>
+                            </div>
+                            <button class="border border-white/10 hover:bg-white/5 text-white font-medium px-5 py-2.5 rounded-xl transition-all">
+                                Manage Plan
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-4 bg-black/40 p-4 rounded-xl border border-white/5 w-fit">
+                            <i class="ph-fill ph-credit-card text-2xl text-gray-400"></i>
+                            <div>
+                                <p class="text-sm text-white">Visa ending in <span class="font-mono">4242</span></p>
+                                <p class="text-xs text-gray-500">Next billing date: Nov 1, 2024</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="preferences" class="tab-content space-y-8">
+                <header class="mb-10 reveal">
+                    <h2 class="text-3xl font-bold text-white mb-2">Preferences</h2>
+                    <p class="text-gray-400">Customize your interface and notification alerts.</p>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 reveal">
+                    <div class="glass-panel rounded-2xl p-8">
+                        <h3 class="text-lg font-semibold text-white mb-6 border-b border-white/10 pb-4">Appearance</h3>
+                        <div class="space-y-6">
+                            <div>
+                                <p class="text-sm text-gray-400 mb-3">Theme Mode</p>
+                                <div class="flex bg-black/50 border border-white/10 rounded-lg p-1 w-fit">
+                                    <button class="px-6 py-2 rounded-md bg-white/10 text-white text-sm font-medium shadow-sm">Dark</button>
+                                    <button class="px-6 py-2 rounded-md text-gray-500 hover:text-white text-sm font-medium transition-colors">Light</button>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-400 mb-3">Accent Color</p>
+                                <div class="flex gap-4">
+                                    <button class="w-8 h-8 rounded-full bg-indigo-500 ring-2 ring-indigo-500 ring-offset-2 ring-offset-black"></button>
+                                    <button class="w-8 h-8 rounded-full bg-emerald-500 hover:ring-2 ring-emerald-500 ring-offset-2 ring-offset-[#030303] transition-all"></button>
+                                    <button class="w-8 h-8 rounded-full bg-rose-500 hover:ring-2 ring-rose-500 ring-offset-2 ring-offset-[#030303] transition-all"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-2xl p-8">
+                        <h3 class="text-lg font-semibold text-white mb-6 border-b border-white/10 pb-4">Notifications</h3>
+                        <div class="space-y-6">
+                              <h3 class="text-lg font-semibold text-white mb-6 border-b border-white/10 pb-4">Select Options</h3>
+                   
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="text-white font-medium">Security Breach alerts</h4>
+                                <p class="text-sm text-gray-400">Automatically redact emails, SSNs, and phone numbers before sending prompts to vendors.</p>
+                            </div>
+                            <div class="relative inline-block w-12 align-middle select-none">
+                                <input type="checkbox" id="t-pii" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10" checked/>
+                                <label for="t-pii" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="text-white font-medium">New login alerts</h4>
+                                <p class="text-sm text-gray-400">Prevent proprietary code blocks from being processed by external LLMs.</p>
+                            </div>
+                            <div class="relative inline-block w-12 align-middle select-none">
+                                <input type="checkbox" id="t-code" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10"/>
+                                <label for="t-code" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
+                            </div>
+                             
+                            
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <section id="danger" class="tab-content space-y-8">
+                <header class="mb-10 reveal">
+                    <h2 class="text-3xl font-bold text-red-500 mb-2">Danger Zone</h2>
+                    <p class="text-gray-400">Irreversible actions regarding your enterprise data.</p>
+                </header>
+
+                <div class="border border-red-500/20 bg-red-500/5 rounded-2xl p-8 relative overflow-hidden reveal">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-red-600/10 rounded-full blur-[80px] pointer-events-none"></div>
+                    
+                    <div class="space-y-8 relative z-10">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h4 class="text-white font-medium text-lg">Purge Vendor Cache</h4>
+                                <p class="text-sm text-gray-400">Instantly delete all cached prompts and outputs currently held in proxy.</p>
+                            </div>
+                            <button class="border border-white/10 hover:bg-white/5 text-white px-5 py-2.5 rounded-xl transition-colors text-sm font-medium">
+                                Purge Cache
+                            </button>
+                        </div>
+                        
+                        <hr class="border-red-500/10">
+
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h4 class="text-white font-medium text-lg">Delete Organization</h4>
+                                <p class="text-sm text-gray-400">Permanently delete your workspace, all API keys, and historical scan data.</p>
+                            </div>
+                            <button class="bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500 hover:text-white px-5 py-2.5 rounded-xl transition-all text-sm font-medium">
+                                Delete Organization
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const navButtons = document.querySelectorAll(".nav-btn");
+            const tabContents = document.querySelectorAll(".tab-content");
+
+            // Animation Logic
+            function triggerAnimations(container) {
+                const reveals = container.querySelectorAll('.reveal');
+                // Reset classes
+                reveals.forEach(el => { el.classList.remove('active'); });
+                
+                // Force DOM reflow to restart animation
+                void container.offsetWidth; 
+                
+                // Staggered reveal
+                reveals.forEach((el, index) => {
+                    setTimeout(() => {
+                        el.classList.add('active');
+                    }, index * 100); 
+                });
+            }
+
+            // Initial load animation
+            triggerAnimations(document.querySelector('.active-tab'));
+
+            // Tab Switching Logic
+            navButtons.forEach(button => {
+                button.addEventListener("click", () => {
+                    const targetId = button.getAttribute("data-target");
+
+                    // 1. Update Sidebar UI
+                    navButtons.forEach(btn => {
+                        btn.classList.remove("bg-indigo-500/10", "text-indigo-400", "border-indigo-500/20");
+                        if(btn.getAttribute("data-target") !== "danger") {
+                            btn.classList.add("text-gray-400", "border-transparent");
+                        }
+                    });
+                    
+                    if(targetId !== "danger") {
+                        button.classList.add("bg-indigo-500/10", "text-indigo-400", "border-indigo-500/20");
+                        button.classList.remove("text-gray-400", "border-transparent");
+                    }
+
+                    // 2. Hide all tabs, show target tab
+                    tabContents.forEach(content => {
+                        content.classList.remove("active-tab");
+                    });
+                    
+                    const targetTab = document.getElementById(targetId);
+                    targetTab.classList.add("active-tab");
+
+                    // 3. Re-trigger animations for the new tab
+                    triggerAnimations(targetTab);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

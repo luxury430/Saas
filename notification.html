@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en" class="antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Notification System</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a; /* Deep premium dark mode */
+            color: #f4f4f5;
+        }
+
+        /* --- Custom Premium Animations --- */
+        
+        /* 1. Bell Shake on Hover */
+        .bell-shake:hover i {
+            animation: ring 0.5s ease-in-out both;
+        }
+        @keyframes ring {
+            0% { transform: rotate(0); }
+            15% { transform: rotate(15deg); }
+            30% { transform: rotate(-10deg); }
+            45% { transform: rotate(5deg); }
+            60% { transform: rotate(-3deg); }
+            75% { transform: rotate(1deg); }
+            100% { transform: rotate(0); }
+        }
+
+        /* 2. Dropdown Smooth Slide & Fade */
+        .dropdown-panel {
+            visibility: hidden;
+            opacity: 0;
+            transform: translateY(-10px) scale(0.98);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); /* Apple-like easing */
+            transform-origin: top right;
+        }
+        .dropdown-panel.open {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* 3. Unread Badge Pulse */
+        .pulse-badge {
+            animation: softPulse 2s infinite;
+        }
+        @keyframes softPulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        /* 4. Unread Notification Glow Item */
+        .notification-item {
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        .notification-item.unread {
+            background-color: rgba(99, 102, 241, 0.05); /* Very subtle indigo tint */
+        }
+        .notification-item:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+        .notification-item:active {
+            transform: scale(0.98);
+        }
+
+        /* Glowing Blue Dot for Unread Items */
+        .unread-dot {
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.8);
+        }
+
+        /* Custom Scrollbar for Dropdown */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center pt-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900 via-[#0a0a0a] to-[#0a0a0a]">
+
+    <header class="w-full max-w-4xl mx-auto bg-[#121212]/80 backdrop-blur-md border border-zinc-800 rounded-2xl px-6 py-3 flex justify-between items-center shadow-2xl">
+        
+        <div class="flex items-center gap-2 text-zinc-100">
+            <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-[0_0_15px_rgba(79,70,229,0.4)]">
+                <i class="fa-solid fa-layer-group text-white text-sm"></i>
+            </div>
+            <span class="font-bold tracking-tight">NexusApp</span>
+        </div>
+
+        <div class="relative" id="notification-wrapper">
+            
+            <button id="bell-btn" class="bell-shake relative p-2 rounded-full text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 transition-colors focus:outline-none">
+                <i class="fa-regular fa-bell text-xl transition-transform"></i>
+                
+                <span id="badge-count" class="pulse-badge absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white border-2 border-[#121212]">
+                    3
+                </span>
+            </button>
+
+            <div id="dropdown" class="dropdown-panel absolute right-0 mt-3 w-80 sm:w-96 bg-[#18181b] border border-zinc-800 rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.7)] overflow-hidden z-50">
+                
+                <div class="px-4 py-3 border-b border-zinc-800/80 flex justify-between items-center bg-[#18181b]/95 backdrop-blur-sm sticky top-0 z-10">
+                    <h3 class="font-semibold text-sm text-zinc-100">Notifications</h3>
+                    <button id="mark-all-read" class="text-xs text-indigo-400 hover:text-indigo-300 transition-colors font-medium">Mark all as read</button>
+                </div>
+
+                <div class="max-h-[400px] overflow-y-auto" id="notification-list">
+                    
+                    <div class="notification-item unread cursor-pointer p-4 border-b border-zinc-800/50 flex gap-4 items-start relative group" data-id="1">
+                        <div class="absolute left-0 top-0 bottom-0 w-0.5 bg-indigo-500 opacity-100 transition-opacity"></div>
+                        <div class="mt-1 flex-shrink-0 w-10 h-10 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-500">
+                            <i class="fa-solid fa-arrow-down-to-line"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-1">
+                                <p class="text-sm font-semibold text-zinc-100">Payment Received</p>
+                                <span class="text-[10px] text-zinc-500 font-medium mt-0.5">2 min ago</span>
+                            </div>
+                            <p class="text-xs text-zinc-400 leading-relaxed">Stripe payout of <span class="text-zinc-200 font-medium">$4,250.00</span> has been successfully deposited to your bank account.</p>
+                        </div>
+                        <div class="w-2 h-2 rounded-full bg-indigo-500 unread-dot mt-2 flex-shrink-0 status-indicator"></div>
+                    </div>
+
+                    <div class="notification-item unread cursor-pointer p-4 border-b border-zinc-800/50 flex gap-4 items-start relative group" data-id="2">
+                        <div class="absolute left-0 top-0 bottom-0 w-0.5 bg-indigo-500 opacity-100 transition-opacity"></div>
+                        <div class="mt-1 flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500">
+                            <i class="fa-solid fa-user-plus"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-1">
+                                <p class="text-sm font-semibold text-zinc-100">New Subscriber</p>
+                                <span class="text-[10px] text-zinc-500 font-medium mt-0.5">14 min ago</span>
+                            </div>
+                            <p class="text-xs text-zinc-400 leading-relaxed"><span class="text-zinc-200 font-medium">Sarah Jenkins</span> just signed up for the Pro Enterprise plan.</p>
+                        </div>
+                        <div class="w-2 h-2 rounded-full bg-indigo-500 unread-dot mt-2 flex-shrink-0 status-indicator"></div>
+                    </div>
+
+                    <div class="notification-item unread cursor-pointer p-4 border-b border-zinc-800/50 flex gap-4 items-start relative group" data-id="3">
+                        <div class="absolute left-0 top-0 bottom-0 w-0.5 bg-indigo-500 opacity-100 transition-opacity"></div>
+                        <div class="mt-1 flex-shrink-0 w-10 h-10 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                            <i class="fa-solid fa-box-open"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-1">
+                                <p class="text-sm font-semibold text-zinc-100">System Update</p>
+                                <span class="text-[10px] text-zinc-500 font-medium mt-0.5">1 hr ago</span>
+                            </div>
+                            <p class="text-xs text-zinc-400 leading-relaxed">Version 4.2 is now live. Please refresh your browser to apply the latest security patches.</p>
+                        </div>
+                        <div class="w-2 h-2 rounded-full bg-indigo-500 unread-dot mt-2 flex-shrink-0 status-indicator"></div>
+                    </div>
+
+                    <div class="notification-item cursor-pointer p-4 flex gap-4 items-start relative group" data-id="4">
+                        <div class="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent opacity-0 transition-opacity"></div>
+                        <div class="mt-1 flex-shrink-0 w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-400">
+                            <img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="Avatar" class="w-full h-full rounded-full object-cover opacity-80 group-hover:opacity-100 transition-opacity">
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-1">
+                                <p class="text-sm font-semibold text-zinc-300">Comment Mention</p>
+                                <span class="text-[10px] text-zinc-600 font-medium mt-0.5">Yesterday</span>
+                            </div>
+                            <p class="text-xs text-zinc-500 leading-relaxed"><span class="text-zinc-300 font-medium">David</span> mentioned you in the "Q3 Marketing Launch" thread.</p>
+                        </div>
+                        <div class="w-2 h-2 mt-2 flex-shrink-0"></div> </div>
+
+                </div>
+                
+                <div class="px-4 py-3 border-t border-zinc-800/80 bg-[#121212] text-center">
+                    <button class="text-xs text-zinc-400 hover:text-zinc-100 font-medium transition-colors">View all activity &rarr;</button>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <div class="mt-20 text-center max-w-lg px-6">
+        <h1 class="text-3xl font-bold text-zinc-100 tracking-tight mb-4">Click the bell above</h1>
+        <p class="text-zinc-500 text-sm leading-relaxed">This simulates a premium notification experience. Try opening the dropdown and clicking an unread notification to see the states change dynamically.</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const bellBtn = document.getElementById('bell-btn');
+            const dropdown = document.getElementById('dropdown');
+            const notificationWrapper = document.getElementById('notification-wrapper');
+            const badgeCount = document.getElementById('badge-count');
+            const markAllReadBtn = document.getElementById('mark-all-read');
+            const notificationItems = document.querySelectorAll('.notification-item');
+
+            let unreadCount = 3;
+
+            // 1. Toggle Dropdown
+            bellBtn.addEventListener('click', (e) => {
+                dropdown.classList.toggle('open');
+                
+                // Swap icon style on open
+                const icon = bellBtn.querySelector('i');
+                if (dropdown.classList.contains('open')) {
+                    icon.classList.remove('fa-regular');
+                    icon.classList.add('fa-solid', 'text-zinc-100');
+                } else {
+                    icon.classList.add('fa-regular');
+                    icon.classList.remove('fa-solid', 'text-zinc-100');
+                }
+            });
+
+            // 2. Close when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!notificationWrapper.contains(e.target) && dropdown.classList.contains('open')) {
+                    dropdown.classList.remove('open');
+                    const icon = bellBtn.querySelector('i');
+                    icon.classList.add('fa-regular');
+                    icon.classList.remove('fa-solid', 'text-zinc-100');
+                }
+            });
+
+            // 3. Mark individual notification as read
+            notificationItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    if (item.classList.contains('unread')) {
+                        // Remove unread styles
+                        item.classList.remove('unread');
+                        
+                        // Hide the blue left border indicator
+                        const leftBorder = item.querySelector('.absolute.bg-indigo-500');
+                        if(leftBorder) leftBorder.style.opacity = '0';
+                        
+                        // Hide the glowing blue dot
+                        const dot = item.querySelector('.status-indicator');
+                        if (dot) dot.style.opacity = '0';
+
+                        // Update Badge Number
+                        unreadCount--;
+                        updateBadge();
+                    }
+                });
+            });
+
+            // 4. Mark ALL as read
+            markAllReadBtn.addEventListener('click', () => {
+                notificationItems.forEach(item => {
+                    if (item.classList.contains('unread')) {
+                        item.classList.remove('unread');
+                        const leftBorder = item.querySelector('.absolute.bg-indigo-500');
+                        if(leftBorder) leftBorder.style.opacity = '0';
+                        const dot = item.querySelector('.status-indicator');
+                        if (dot) dot.style.opacity = '0';
+                    }
+                });
+                unreadCount = 0;
+                updateBadge();
+            });
+
+            // Helper to update the red badge UI
+            function updateBadge() {
+                if (unreadCount > 0) {
+                    badgeCount.innerText = unreadCount;
+                } else {
+                    // Shrink and hide the badge smoothly
+                    badgeCount.style.transform = 'scale(0)';
+                    badgeCount.style.opacity = '0';
+                    setTimeout(() => badgeCount.style.display = 'none', 300);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

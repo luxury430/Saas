@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VaultX Premium Enterprise</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --mystery-black: #050505;
+            --surface-dark: #121212;
+            --rose-gold: #d4af37; /* Shifted to a more premium gold */
+            --rose-gold-hover: #f3e5ab;
+            --text-main: #f5f5f7; /* Apple's off-white */
+            --text-muted: #86868b; /* Apple's muted gray */
+            --glass-bg: rgba(25, 25, 25, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-highlight: rgba(255, 255, 255, 0.15);
+            --success: #32d74b; /* iOS Green */
+            --warning: #ffd60a;
+            --danger: #ff453a;
+            --transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            /* Premium System Fonts */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Custom Sleek Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
+        body {
+            background-color: var(--mystery-black);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Ambient Background Glow */
+        .ambient-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 15% 50%, rgba(212, 175, 55, 0.08), transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(50, 215, 75, 0.05), transparent 40%);
+            animation: breathe 15s ease-in-out infinite alternate;
+        }
+
+        @keyframes breathe {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.1); opacity: 1; }
+        }
+
+        /* --- Navigation Elements --- */
+        .menu-btn {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            z-index: 9000;
+            cursor: pointer;
+            background: rgba(30, 30, 30, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            transition: var(--transition);
+            outline: none;
+-webkit-tap-highlight-color: transparent
+}
+        
+
+        .menu-btn:hover { background: rgba(50, 50, 50, 0.8); border-color: var(--glass-highlight); }
+
+        .btn-line {
+            width: 24px;
+            height: 2px;
+            background-color: var(--text-main);
+            margin: 5px 0;
+            transition: 0.4s cubic-bezier(0.6, 0.05, 0.1, 0.9);
+            border-radius: 2px;
+        }
+
+        .side-nav {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: min(340px, 85%);
+            height: 100vh;
+            background: rgba(10, 10, 10, 0.75);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-right: 1px solid var(--glass-border);
+            z-index: 1999;
+            transition: left 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            padding: clamp(30px, 5vw, 50px);
+            box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+        .side-nav::-webkit-scrollbar {
+    width: 6px;
+}
+
+.side-nav::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+}
+
+        .side-nav.active { left: 0; }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 50px;
+            color: var(--text-main);
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            outline: none;
+-webkit-tap-highlight-color: transparent
+}
+        
+
+        .nav-logo i { color: var(--rose-gold); }
+
+        .nav-links { list-style: none; padding: 0; flex-grow: 1; }
+
+        .nav-item {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 1.05rem;
+            font-weight: 500;
+            padding: 15px 20px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            outline: none;
+-webkit-tap-highlight-color: transparent
+
+                    }
+
+        .nav-item i { width: 20px; text-align: center; font-size: 1.1rem; }
+
+        .nav-item:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active {
+            color: var(--mystery-black);
+            background: var(--text-main);
+            box-shadow: 0 4px 15px rgba(255,255,255,0.1);
+        }
+
+        .menu-blur {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
+            z-index: 1998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        .menu-blur.active { opacity: 1; pointer-events: auto; }
+
+        /* Burger Animation */
+        .menu-btn.open .btn-line:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .menu-btn.open .btn-line:nth-child(2) { opacity: 0; }
+        .menu-btn.open .btn-line:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        /* --- Main Content Area --- */
+        .main-content {
+            flex: 1;
+            padding: 100px 5vw 50px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Premium Profile Header */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--glass-border);
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .profile-left { display: flex; align-items: center; gap: 30px; }
+
+        .avatar-container { position: relative; }
+        
+        .avatar {
+            width: 110px;
+            height: 110px;
+            border-radius: 35%; /* Apple Squircle vibe */
+            object-fit: cover;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            border: 1px solid var(--glass-highlight);
+        }
+
+        /* Pulsing Status Dot */
+        .status-dot {
+            position: absolute;
+            bottom: -5px; right: -5px;
+            width: 24px; height: 24px;
+            background: var(--surface-dark);
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .status-dot::after {
+            content: ''; width: 14px; height: 14px;
+            background: var(--success); border-radius: 50%;
+            box-shadow: 0 0 10px var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(50, 215, 75, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(50, 215, 75, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(50, 215, 75, 0); }
+        }
+
+        .profile-info h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .badge-role {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--rose-gold);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .btn-primary {
+            background: var(--text-main);
+            color: var(--mystery-black);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(255,255,255,0.1); }
+
+        /* --- Sections & Cards --- */
+        .tab-section { display: none; }
+        .tab-section.active { display: block; }
+
+        /* Apple-style Glass Cards */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid var(--glass-highlight); /* Light source from top */
+            border-radius: 24px;
+            padding: 35px;
+            transition: var(--transition);
+            margin-bottom: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-card:hover { border-color: rgba(255, 255, 255, 0.2); }
+
+        .card-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 25px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .card-header i { color: var(--text-muted); }
+
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+
+        .stat-value { font-size: 2.8rem; font-weight: 700; letter-spacing: -1px; margin: 5px 0 10px; }
+        
+        /* CSS Bar Chart for Analytics */
+        .chart-container {
+            display: flex; align-items: flex-end; justify-content: space-between;
+            height: 150px; margin-top: 20px; gap: 10px;
+            border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;
+        }
+        .bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; flex: 1; }
+        .bar {
+            width: 100%; max-width: 40px; background: rgba(255,255,255,0.1);
+            border-radius: 6px 6px 0 0; position: relative; overflow: hidden;
+            transition: 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+            height: 0; /* Animated via JS/CSS */
+        }
+        .bar-fill {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, var(--rose-gold), transparent);
+            opacity: 0.8;
+        }
+        .bar-wrap:hover .bar { background: rgba(255,255,255,0.2); transform: scaleY(1.05); transform-origin: bottom; }
+        .chart-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+
+        /* iOS Style Toggles */
+        .toggle-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 0; border-bottom: 1px solid var(--glass-border);
+        }
+        .toggle-row:last-child { border-bottom: none; }
+        
+        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255,255,255,0.1); transition: .4s; border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 20px; width: 20px;
+            left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* API & Log elements */
+        .api-key-box {
+            background: rgba(0,0,0,0.4); padding: 18px 25px; border-radius: 12px;
+            border: 1px solid var(--glass-border); display: flex; justify-content: space-between;
+            align-items: center; margin-top: 15px; font-family: monospace;
+        }
+        .blur-text { filter: blur(6px); transition: filter 0.3s; cursor: pointer; user-select: none; }
+        .api-key-box:hover .blur-text { filter: blur(0); user-select: auto; }
+
+        .btn-outline {
+            background: transparent; color: var(--text-main);
+            border: 1px solid rgba(255,255,255,0.3); padding: 8px 18px;
+            border-radius: 8px; cursor: pointer; font-weight: 500; transition: var(--transition);
+        }
+        .btn-outline:hover { background: var(--text-main); color: var(--mystery-black); }
+
+        /* Animations */
+        .fade-up { opacity: 0; transform: translateY(20px); }
+        .animate-up { animation: slideUpFade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        .delay-1 { animation-delay: 0.1s; } .delay-2 { animation-delay: 0.2s; } .delay-3 { animation-delay: 0.3s; }
+
+        @keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
+
+        /* Responsiveness */
+        @media (max-width: 1024px) {
+            .grid-3, .grid-2 { grid-template-columns: 1fr; }
+            .profile-header { flex-direction: column; align-items: flex-start; }
+            .btn-primary { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-bg"></div>
+
+    <div class="menu-btn" onclick="togglePremiumMenu()">
+        <div class="btn-line"></div>
+        <div class="btn-line"></div>
+        <div class="btn-line"></div>
+    </div>
+
+    <nav class="side-nav" id="sideNav">
+        <div class="nav-logo"><i class="fa-solid fa-fingerprint"></i> NeuroForge</div>
+        <ul class="nav-links">
+            <li class="nav-item active" onclick="switchSection('overview', this); togglePremiumMenu();">
+                <i class="fa-solid fa-house"></i> Dashboard
+            </li>
+            <li class="nav-item" onclick="switchSection('analytics', this); togglePremiumMenu();">
+                <i class="fa-solid fa-chart-line"></i> Traffic & Analytics
+            </li>
+            <li class="nav-item" onclick="switchSection('security', this); togglePremiumMenu();">
+                <i class="fa-solid fa-shield-halved"></i> Security & API
+            </li>
+            <li class="nav-item" onclick="switchSection('team', this); togglePremiumMenu();">
+                <i class="fa-solid fa-users"></i> Team Access
+            </li>
+            <li class="nav-item" onclick="switchSection('settings', this); togglePremiumMenu();">
+                <i class="fa-solid fa-gear"></i> System Settings
+            </li>
+        </ul>
+        <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--glass-border);">
+            <div style="display: flex; align-items: center; gap: 15px; color: var(--text-muted);">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" style="width: 40px; border-radius: 50%;">
+                <div>
+                    <div style="color: white; font-size: 0.9rem; font-weight: 500;">John d.</div>
+                    <div style="font-size: 0.8rem;">Super Admin</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="menu-blur" id="menuBlur" onclick="togglePremiumMenu()"></div>
+
+    <main class="main-content">
+        <header class="profile-header fade-up animate-up">
+            <div class="profile-left">
+                <div class="avatar-container">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&q=80" alt="Avatar" class="avatar">
+                    <div class="status-dot" title="System Online"></div>
+                </div>
+                <div class="profile-info">
+                    <h1>John.d</h1>
+                    <div style="margin-bottom: 10px;">
+                        <span class="badge-role"><i class="fa-solid fa-crown"></i> Super Admin</span>
+                        <span class="badge-role" style="background: rgba(255,255,255,0.05); color: var(--text-main); border-color: transparent;">Enterprise Tier</span>
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 0.95rem;">
+                        <i class="fa-solid fa-envelope"></i> contact@john.com &nbsp;&middot;&nbsp; Server ID: VX-992A
+                    </div>
+                </div>
+            </div>
+            <button class="btn-primary"><i class="fa-solid fa-pen-to-square"></i> Edit Identity</button>
+        </header>
+
+        <div id="overview" class="tab-section active">
+            <div class="grid-3">
+                <div class="glass-card fade-up animate-up delay-1">
+                    <div class="card-header">Total Requests <i class="fa-solid fa-server"></i></div>
+                    <div class="stat-value">2.4M</div>
+                    <div style="color: var(--success); font-size: 0.9rem; font-weight: 500;"><i class="fa-solid fa-arrow-trend-up"></i> +14.2% this week</div>
+                </div>
+                <div class="glass-card fade-up animate-up delay-2">
+                    <div class="card-header">Threat Blocks <i class="fa-solid fa-shield-virus"></i></div>
+                    <div class="stat-value">842</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">Zero-day signatures updated</div>
+                </div>
+                <div class="glass-card fade-up animate-up delay-3">
+                    <div class="card-header">Network Latency <i class="fa-solid fa-wifi"></i></div>
+                    <div class="stat-value" style="color: var(--warning);">24ms</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">Global edge routing active</div>
+                </div>
+            </div>
+
+            <div class="glass-card fade-up animate-up delay-3" style="margin-top: 10px;">
+                <div class="card-header">Global Edge Traffic (Last 7 Days) <i class="fa-solid fa-ellipsis"></i></div>
+                <div class="chart-container" id="trafficChart">
+                    <div class="bar-wrap"><div class="bar" data-height="40%"><div class="bar-fill"></div></div><span class="chart-label">Mon</span></div>
+                    <div class="bar-wrap"><div class="bar" data-height="65%"><div class="bar-fill"></div></div><span class="chart-label">Tue</span></div>
+                    <div class="bar-wrap"><div class="bar" data-height="50%"><div class="bar-fill"></div></div><span class="chart-label">Wed</span></div>
+                    <div class="bar-wrap"><div class="bar" data-height="90%"><div class="bar-fill"></div></div><span class="chart-label">Thu</span></div>
+                    <div class="bar-wrap"><div class="bar" data-height="75%"><div class="bar-fill"></div></div><span class="chart-label">Fri</span></div>
+                    <div class="bar-wrap"><div class="bar" data-height="30%"><div class="bar-fill"></div></div><span class="chart-label">Sat</span></div>
+                    <div class="bar-wrap"><div class="bar" data-height="45%"><div class="bar-fill"></div></div><span class="chart-label">Sun</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="security" class="tab-section">
+            <div class="grid-2">
+                <div>
+                    <div class="glass-card fade-up">
+                        <div class="card-header">Authentication <i class="fa-solid fa-lock"></i></div>
+                        <div class="toggle-row">
+                            <div>
+                                <div style="font-weight: 500; font-size: 1.1rem;">Two-Factor Authentication</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Require 2FA via Authenticator App</div>
+                            </div>
+                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        </div>
+                        <div class="toggle-row">
+                            <div>
+                                <div style="font-weight: 500; font-size: 1.1rem;">Strict IP Whitelisting</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Only allow connections from known corporate IPs</div>
+                            </div>
+                            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                        </div>
+                    </div>
+
+                    <div class="glass-card fade-up delay-1">
+                        <div class="card-header">Production API Keys <i class="fa-solid fa-key"></i></div>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">Hover to reveal your secret key. Do not expose this in client-side code.</p>
+                        <div class="api-key-box">
+                            <div>
+                                <div style="font-size: 0.75rem; color: var(--rose-gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Live Secret</div>
+                                <span class="blur-text">sk_live_9f8d7c6b5a4xyz_ENTERPRISE_889</span>
+                            </div>
+                            <button class="btn-outline"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card fade-up delay-2">
+                    <div class="card-header">Audit Logs <i class="fa-solid fa-list-check"></i></div>
+                    <div style="border-left: 2px solid rgba(255,255,255,0.1); padding-left: 20px; margin-left: 10px;">
+                        <div style="position: relative; margin-bottom: 25px;">
+                            <div style="position: absolute; left: -26px; top: 4px; width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 10px var(--success);"></div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Just Now</div>
+                            <div style="font-weight: 500; margin-top: 3px;">Super Admin Login</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">IP: 192.168.1.1 (Encrypted)</div>
+                        </div>
+                        <div style="position: relative; margin-bottom: 25px;">
+                            <div style="position: absolute; left: -26px; top: 4px; width: 10px; height: 10px; background: rgba(255,255,255,0.5); border-radius: 50%;"></div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Yesterday, 14:20 PM</div>
+                            <div style="font-weight: 500; margin-top: 3px;">API Key Rotated</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Executed by System Automator</div>
+                        </div>
+                         <div style="position: relative;">
+                            <div style="position: absolute; left: -26px; top: 4px; width: 10px; height: 10px; background: var(--danger); border-radius: 50%; box-shadow: 0 0 10px var(--danger);"></div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Mar 22, 03:00 AM</div>
+                            <div style="font-weight: 500; margin-top: 3px;">Blocked SSH Attack</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Source: Unknown Proxy</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="analytics" class="tab-section">
+            <div class="glass-card fade-up"><h2 style="font-weight: 400; text-align: center; color: var(--text-muted); padding: 50px 0;">Advanced Analytics Interface</h2></div>
+        </div>
+        <div id="team" class="tab-section">
+            <div class="glass-card fade-up"><h2 style="font-weight: 400; text-align: center; color: var(--text-muted); padding: 50px 0;">Team Management</h2></div>
+        </div>
+        <div id="settings" class="tab-section">
+            <div class="glass-card fade-up"><h2 style="font-weight: 400; text-align: center; color: var(--text-muted); padding: 50px 0;">System Configuration</h2></div>
+        </div>
+
+    </main>
+
+    <script>
+        // Animate the CSS Bar Chart on load/switch
+        function animateChart() {
+            setTimeout(() => {
+                document.querySelectorAll('.bar').forEach(bar => {
+                    bar.style.height = bar.getAttribute('data-height');
+                });
+            }, 300); // Slight delay for the fade-up animation to happen first
+        }
+
+        // Run on initial load
+        window.addEventListener('DOMContentLoaded', animateChart);
+
+        function switchSection(sectionId, element) {
+            // Update active state in sidebar
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+
+            // Reset and hide all sections
+            document.querySelectorAll('.tab-section').forEach(section => {
+                section.classList.remove('active');
+                const animatedElements = section.querySelectorAll('.fade-up');
+                animatedElements.forEach(el => {
+                    el.classList.remove('animate-up');
+                    void el.offsetWidth; // Reflow
+                });
+                
+                // Reset chart bars if navigating away
+                if(section.id === 'overview') {
+                    section.querySelectorAll('.bar').forEach(bar => bar.style.height = '0');
+                }
+            });
+
+            // Show selected section
+            const targetSection = document.getElementById(sectionId);
+            targetSection.classList.add('active');
+            
+            const targetElements = targetSection.querySelectorAll('.fade-up');
+            targetElements.forEach(el => el.classList.add('animate-up'));
+
+            // Re-animate chart if overview is selected
+            if(sectionId === 'overview') animateChart();
+        }
+
+      function togglePremiumMenu() {
+    const nav = document.getElementById('sideNav');
+    const btn = document.querySelector('.menu-btn');
+    const blur = document.getElementById('menuBlur');
+
+    nav.classList.toggle('active');
+    btn.classList.toggle('open');
+    blur.classList.toggle('active');
+
+    // ✅ Only lock scroll on mobile
+    if (window.innerWidth <= 768) {
+        document.body.style.overflow = nav.classList.contains('active') ? 'hidden' : 'auto';
+    }
+}
+    </script>
+</body>
+</html>

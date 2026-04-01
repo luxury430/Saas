@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en" class="antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Global ERP Console</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+        :root {
+            --bg-base: #0a0a0a;
+            --bg-surface: #121212;
+            --bg-surface-hover: #1e1e1e;
+            --bg-header: #18181b;
+            --border-color: #27272a; 
+            --text-main: #f4f4f5; 
+            --text-muted: #a1a1aa; 
+            --text-dim: #71717a;
+            --accent: #e4e4e7; 
+            --brand: #6366f1; 
+            --chart-grid: #27272a;
+        }
+
+        body.light-mode {
+            --bg-base: #f4f4f5; 
+            --bg-surface: #ffffff;
+            --bg-surface-hover: #e4e4e7;
+            --bg-header: #fdfdfd;
+            --border-color: #d4d4d8; 
+            --text-main: #18181b; 
+            --text-muted: #52525b; 
+            --text-dim: #a1a1aa;
+            --accent: #18181b;
+            --chart-grid: #e4e4e7;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            overflow: hidden;
+            font-size: 13px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* --- High-Density Animations --- */
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+        
+        .pulse-slow { animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+
+        .slide-up-terminal { transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .slide-up-terminal.open { transform: translateY(0); }
+
+        .slide-left-drawer { transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .slide-left-drawer.open { transform: translateX(0); }
+
+        /* --- Scrollbars --- */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg-base); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* --- Custom UI Elements --- */
+        .nav-item {
+            display: flex; align-items: center; padding: 6px 12px; margin: 2px 8px; border-radius: 6px;
+            color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+        }
+        .nav-item:hover { background-color: var(--bg-surface-hover); color: var(--text-main); }
+        .nav-active { background-color: var(--bg-surface-hover); color: var(--text-main); font-weight: 500; border-left: 2px solid var(--text-main); }
+
+        .metric-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; position: relative; overflow: hidden; transition: background-color 0.3s, border-color 0.3s; }
+        .metric-card::after { content: ''; position: absolute; top: 0; right: 0; width: 60px; height: 100%; background: linear-gradient(90deg, transparent, rgba(125,125,125,0.05)); pointer-events: none; }
+
+        .data-table th { background: var(--bg-surface); border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; padding: 8px 12px; font-weight: 600; }
+        .data-table td { border-bottom: 1px solid var(--border-color); padding: 10px 12px; white-space: nowrap; color: var(--text-main); }
+        .data-table tr:hover td { background-color: rgba(125,125,125,0.05); }
+
+        .progress-track { background: var(--border-color); height: 4px; border-radius: 2px; overflow: hidden; width: 100%; }
+        .progress-fill { background: var(--text-main); height: 100%; border-radius: 2px; }
+
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        .status-live { background-color: #22c55e; box-shadow: 0 0 8px #22c55e; }
+        .status-warn { background-color: #eab308; box-shadow: 0 0 8px #eab308; }
+        .status-err { background-color: #ef4444; box-shadow: 0 0 8px #ef4444; }
+
+        /* Terminal Logs */
+        .log-line { font-family: 'JetBrains Mono', monospace; font-size: 11px; margin-bottom: 4px; display: flex; gap: 12px; }
+        .log-time { color: var(--text-dim); }
+        .log-info { color: #3b82f6; }
+        .log-warn { color: #eab308; }
+        .log-success { color: #22c55e; }
+        .log-err { color: #ef4444; }
+        
+        /* Utility classes referencing variables */
+        .bg-base { background-color: var(--bg-base); }
+        .bg-surface { background-color: var(--bg-surface); }
+        .bg-header { background-color: var(--bg-header); }
+        .border-base { border-color: var(--border-color); }
+        .text-main { color: var(--text-main); }
+        .text-muted { color: var(--text-muted); }
+        
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease-in-out forwards; }
+        
+        :root {
+  --text3: #445577;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #020810;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#loader {
+  position: fixed; inset: 0; z-index: 9999;
+  background: #020810;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  overflow: hidden;
+}
+
+.loader-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridPan 20s linear infinite;
+}
+
+@keyframes gridPan {
+  from { transform: perspective(800px) rotateX(20deg) translateY(0); }
+  to   { transform: perspective(800px) rotateX(20deg) translateY(60px); }
+}
+
+.loader-glow {
+  position: absolute;
+  width: 600px; height: 600px;
+  background: radial-gradient(ellipse, rgba(0,212,255,0.08) 0%, transparent 70%);
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%,100% { transform: scale(1); opacity: 0.5; }
+  50%      { transform: scale(1.2); opacity: 1; }
+}
+
+.loader-content {
+  display: flex; flex-direction: column; align-items: center;
+  animation: loaderReveal 0.8s cubic-bezier(0.34,1.56,0.64,1) 0.3s both;
+  position: relative; z-index: 2;
+}
+
+@keyframes loaderReveal {
+  from { opacity:0; transform: scale(0.6) translateY(20px); }
+  to   { opacity:1; transform: scale(1) translateY(0); }
+}
+
+.loader-emblem {
+  width: 100px; height: 100px;
+  position: relative; margin-bottom: 28px;
+}
+
+.loader-emblem-inner {
+  width: 100%; height: 100%;
+  border-radius: 26px;
+  background: linear-gradient(135deg, #0b2040, #0d2a5a);
+  border: 1px solid rgba(0,212,255,0.3);
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  box-shadow: 0 0 0 1px rgba(0,212,255,0.1), 0 0 60px rgba(0,212,255,0.2), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.loader-emblem-ring {
+  position: absolute; inset: -8px;
+  border-radius: 34px;
+  border: 1.5px solid transparent;
+  background: linear-gradient(135deg, rgba(0,212,255,0.6), rgba(124,58,237,0.6), transparent, transparent) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  animation: ringRotate 4s linear infinite;
+}
+
+@keyframes ringRotate { to { transform: rotate(360deg); } }
+
+.loader-emblem-ring2 {
+  position: absolute; inset: -16px;
+  border-radius: 42px;
+  border: 1px solid transparent;
+  background: linear-gradient(135deg, transparent, transparent, rgba(124,58,237,0.4), rgba(0,212,255,0.4)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  animation: ringRotate 7s linear infinite reverse;
+}
+
+.loader-logo-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 36px; font-weight: 800;
+  letter-spacing: -1px;
+  background: linear-gradient(135deg, #ffffff 0%, #00d4ff 50%, #7c3aed 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 6px;
+}
+
+.loader-tagline {
+  font-size: 11px; letter-spacing: 4px;
+  text-transform: uppercase; color: var(--text3);
+  animation: fadeUp 0.5s ease 1s both;
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.loader-progress-wrap {
+  margin-top: 48px; width: 220px;
+  animation: fadeUp 0.5s ease 0.9s both;
+}
+
+.loader-progress-label {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--text3); margin-bottom: 8px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.loader-progress-track {
+  height: 2px; background: rgba(255,255,255,0.06);
+  border-radius: 2px; overflow: hidden;
+}
+
+.loader-progress-fill {
+  height: 100%; width: 0; border-radius: 2px;
+  background: linear-gradient(90deg, #00d4ff, #7c3aed);
+  box-shadow: 0 0 10px rgba(0,212,255,0.6);
+  animation: fillProgress 2.4s cubic-bezier(0.4,0,0.2,1) 0.8s forwards;
+}
+
+@keyframes fillProgress {
+  0%   { width: 0%; }
+  30%  { width: 45%; }
+  70%  { width: 78%; }
+  100% { width: 100%; }
+}
+
+.loader-dots {
+  display: flex; gap: 6px; margin-top: 20px;
+  animation: fadeUp 0.4s ease 1s both;
+}
+
+.l-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(0,212,255,0.3);
+  animation: dotPulse 1.4s ease-in-out infinite;
+}
+
+.l-dot:nth-child(2) { animation-delay: 0.2s; }
+.l-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dotPulse {
+  0%,100% { background: rgba(0,212,255,0.2); transform: scale(1); }
+  50%      { background: #00d4ff; transform: scale(1.4); }
+}
+
+.loader-from {
+  position: absolute; bottom: 36px;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  animation: fadeUp 0.5s ease 1.2s both;
+}
+
+.loader-from-label {
+  font-size: 9px; letter-spacing: 4px;
+  color: rgba(255,255,255,0.2); text-transform: uppercase;
+}
+
+.loader-from-brand {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 700; letter-spacing: 3px;
+  background: linear-gradient(90deg, #00d4ff, #7c3aed);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.loader-exit {
+  animation: loaderExit 0.7s cubic-bezier(0.4,0,1,1) forwards;
+}
+
+@keyframes loaderExit {
+  to { opacity: 0; transform: scale(1.06); pointer-events: none; }
+}
+
+    </style>
+</head>
+<body class="flex h-screen flex-col">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+
+<div id="loader">
+  <div class="loader-grid"></div>
+  <div class="loader-glow"></div>
+  <div class="loader-content">
+    <div class="loader-emblem">
+      <div class="loader-emblem-ring2"></div>
+      <div class="loader-emblem-ring"></div>
+      <div class="loader-emblem-inner">
+        <svg width="46" height="46" viewBox="0 0 46 46" fill="none">
+          <path d="M8 38V12L23 6L38 12V38" stroke="#00d4ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M8 20L23 14L38 20" stroke="#00d4ff" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+          <circle cx="23" cy="29" r="6" fill="none" stroke="#7c3aed" stroke-width="2.5"/>
+          <circle cx="23" cy="29" r="2.5" fill="#00d4ff"/>
+          <path d="M17.5 38V29" stroke="#7c3aed" stroke-width="2" stroke-linecap="round"/>
+          <path d="M28.5 38V29" stroke="#7c3aed" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+    <div class="loader-logo-name">NeuroForge</div>
+    <div class="loader-tagline">Enterprise Intelligence Platform</div>
+    <div class="loader-progress-wrap">
+      <div class="loader-progress-label">
+        <span>Initializing workspace</span>
+        <span id="loadPct">0%</span>
+      </div>
+      <div class="loader-progress-track">
+        <div class="loader-progress-fill"></div>
+      </div>
+    </div>
+    <div class="loader-dots">
+      <div class="l-dot"></div>
+      <div class="l-dot"></div>
+      <div class="l-dot"></div>
+    </div>
+  </div>
+  <div class="loader-from">
+    <span class="loader-from-label">from</span>
+    <span class="loader-from-brand">NEUROFORGE</span>
+  </div>
+</div>
+
+    <header class="h-14 border-b border-base bg-base flex items-center justify-between px-4 z-30 shrink-0 transition-colors">
+        <div class="flex items-center gap-6 w-1/3">
+            <div class="flex items-center gap-2 text-main">
+                <i class="fa-solid fa-chart-pie text-sm text-indigo-500"></i>
+                <span class="font-bold tracking-tight text-sm">NEUROFORGE</span>
+                <span class="bg-surface text-muted text-[9px] px-1.5 py-0.5 rounded font-mono border border-base">ERP v4.2</span>
+            </div>
+            
+            <div class="relative flex-1 max-w-xs group">
+                <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-muted text-xs"></i>
+                <input type="text" placeholder="Search orders, clients, or items..." 
+                       class="w-full bg-surface border border-base rounded-md py-1.5 pl-8 pr-12 text-xs text-main placeholder-muted focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+                <div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex gap-1">
+                    <kbd class="font-mono bg-base border border-base text-muted px-1 py-0.5 rounded text-[9px]">⌘</kbd>
+                    <kbd class="font-mono bg-base border border-base text-muted px-1 py-0.5 rounded text-[9px]">K</kbd>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-center w-1/3">
+            <div class="flex items-center bg-surface border border-base rounded-md p-0.5 text-xs font-medium">
+                <button class="px-3 py-1 bg-base text-main border border-base rounded-sm shadow-sm flex items-center gap-2"><div class="status-dot status-live"></div> Global HQ</button>
+                <button class="px-3 py-1 text-muted hover:text-main transition">NA East</button>
+                <button class="px-3 py-1 text-muted hover:text-main transition">EMEA</button>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-4 w-1/3">
+            <div class="text-right mr-2">
+                <p class="text-[10px] text-muted font-mono">Daily Revenue Run Rate</p>
+                <p class="text-xs font-bold text-main">$12.4M / day</p>
+            </div>
+            <button id="theme-toggle" class="text-muted hover:text-main transition"><i class="fa-solid fa-moon"></i></button>
+            <button id="toggle-copilot" class="text-muted hover:text-main transition relative">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span class="absolute -top-1 -right-1 flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span></span>
+            </button>
+            <div class="w-7 h-7 rounded bg-surface border border-base flex items-center justify-center text-xs font-bold text-main cursor-pointer">
+                JD
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden relative">
+        <aside class="w-[240px] bg-base border-r border-base flex flex-col z-20 shrink-0 py-4 overflow-y-auto transition-colors">
+            
+            <p class="px-5 text-[10px] font-bold text-muted uppercase tracking-widest mb-2">Command Center</p>
+            <div class="nav-item nav-active" data-target="view-dashboard"><i class="fa-solid fa-gauge-high w-6 text-center text-sm"></i> Exec Dashboard</div>
+            <div class="nav-item justify-between" data-target="view-transactions">
+                <div class="flex items-center"><i class="fa-solid fa-money-bill-transfer w-6 text-center text-sm"></i> Live Transactions</div>
+                <span class="pulse-slow status-dot status-live !mr-0"></span>
+            </div>
+            <div class="nav-item" data-target="view-inventory"><i class="fa-solid fa-boxes-stacked w-6 text-center text-sm"></i> Global Inventory</div>
+
+            <p class="px-5 text-[10px] font-bold text-muted uppercase tracking-widest mb-2 mt-6">Operations</p>
+            <div class="nav-item" data-target="view-marketing"><i class="fa-solid fa-bullhorn w-6 text-center text-sm"></i> Marketing Campaigns</div>
+            <div class="nav-item" data-target="view-supply"><i class="fa-solid fa-truck-fast w-6 text-center text-sm"></i> Supply Chain</div>
+            <div class="nav-item" data-target="view-support"><i class="fa-solid fa-headset w-6 text-center text-sm"></i> Customer Support</div>
+            <div class="nav-item" data-target="view-hr"><i class="fa-solid fa-users w-6 text-center text-sm"></i> HR & Team Ops</div>
+
+            <p class="px-5 text-[10px] font-bold text-muted uppercase tracking-widest mb-2 mt-6">Financials</p>
+            <div class="nav-item" data-target="view-revenue"><i class="fa-solid fa-chart-line w-6 text-center text-sm"></i> Revenue Streams</div>
+            <div class="nav-item" data-target="view-expenses"><i class="fa-solid fa-receipt w-6 text-center text-sm"></i> Expense Tracking</div>
+            <div class="nav-item" data-target="view-invoices"><i class="fa-solid fa-file-invoice-dollar w-6 text-center text-sm"></i> Accounts & Invoices</div>
+
+            <p class="px-5 text-[10px] font-bold text-muted uppercase tracking-widest mb-2 mt-6">Enterprise Setup</p>
+            <div class="nav-item" data-target="view-regions"><i class="fa-solid fa-globe w-6 text-center text-sm"></i> Regional Offices</div>
+            <div class="nav-item" data-target="view-partners"><i class="fa-solid fa-handshake w-6 text-center text-sm"></i> Partner Network</div>
+            <div class="nav-item" data-target="view-settings"><i class="fa-solid fa-gear w-6 text-center text-sm"></i> Platform Settings</div>
+
+            <div class="mt-auto px-4 pt-4">
+                <div class="bg-surface border border-base p-3 rounded-lg flex flex-col gap-2">
+                    <div class="flex justify-between items-center text-[10px] text-muted">
+                        <span>Q3 Sales Target</span> <span class="font-mono">84%</span>
+                    </div>
+                    <div class="progress-track"><div class="progress-fill" style="width: 84%; background-color: #22c55e;"></div></div>
+                    <p class="text-[9px] text-muted mt-1">Approaching $50M target in EMEA region.</p>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto bg-base relative p-6 pb-24 transition-colors">
+            
+            <div class="flex justify-between items-end mb-6">
+                <div>
+                    <h1 id="view-title" class="text-2xl font-bold text-main tracking-tight">Executive Dashboard</h1>
+                    <p class="text-xs text-muted mt-1 flex items-center gap-2">
+                        <i class="fa-solid fa-rotate text-[10px]"></i> Syncing ERP data from 14 global regions. Last updated: <span class="font-mono text-muted" id="clock">00:00:00 UTC</span>
+                    </p>
+                </div>
+                <div class="flex gap-2">
+                    <button class="bg-surface border border-base hover:bg-base text-main px-3 py-1.5 rounded text-xs font-medium transition"><i class="fa-solid fa-download mr-1"></i> Export Report</button>
+                    <button id="toggle-terminal" class="bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-1.5 rounded text-xs font-bold shadow-md transition"><i class="fa-solid fa-terminal mr-1"></i> View System Logs</button>
+                </div>
+            </div>
+
+            <div id="view-dashboard" class="view-section active">
+                <div class="grid grid-cols-5 gap-4 mb-6">
+                    <div class="metric-card">
+                        <p class="text-[10px] text-muted font-bold uppercase tracking-wider mb-2">Total Revenue (24h)</p>
+                        <h3 class="text-xl font-bold text-main font-mono tracking-tight">$1.42 Million</h3>
+                        <div class="mt-2 flex items-center text-[10px] text-green-500"><i class="fa-solid fa-arrow-up mr-1"></i> 14.2% vs yesterday</div>
+                    </div>
+                    <div class="metric-card">
+                        <p class="text-[10px] text-muted font-bold uppercase tracking-wider mb-2">Conversion Rate</p>
+                        <h3 class="text-xl font-bold text-main font-mono tracking-tight">4.2%</h3>
+                        <div class="mt-2 flex items-center text-[10px] text-muted"><i class="fa-solid fa-minus mr-1"></i> Stable across regions</div>
+                    </div>
+                    <div class="metric-card">
+                        <p class="text-[10px] text-muted font-bold uppercase tracking-wider mb-2">Active Customers</p>
+                        <h3 class="text-xl font-bold text-main font-mono tracking-tight">12,450</h3>
+                        <div class="mt-2 flex items-center text-[10px] text-green-500"><i class="fa-solid fa-arrow-up mr-1"></i> 2.1% peak engagement</div>
+                    </div>
+                    <div class="metric-card">
+                        <p class="text-[10px] text-muted font-bold uppercase tracking-wider mb-2">Operating Costs (Est)</p>
+                        <h3 class="text-xl font-bold text-main font-mono tracking-tight">$240,500</h3>
+                        <div class="mt-2 flex items-center text-[10px] text-red-500"><i class="fa-solid fa-arrow-up mr-1"></i> $12k over projection</div>
+                    </div>
+                    <div class="metric-card">
+                        <p class="text-[10px] text-muted font-bold uppercase tracking-wider mb-2">Support Tickets</p>
+                        <h3 class="text-xl font-bold text-main font-mono tracking-tight">452</h3>
+                        <div class="mt-2 flex items-center text-[10px] text-muted">95% resolved within SLA</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-6 mb-6">
+                    <div class="col-span-2 bg-surface border border-base rounded-lg p-5 relative">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-sm font-semibold text-main flex items-center gap-2"><div class="w-2 h-2 rounded bg-indigo-500"></div> Real-Time Sales Volume ($)</h2>
+                            <div class="flex gap-1 bg-base border border-base rounded p-0.5">
+                                <button class="px-2 py-0.5 text-[10px] bg-surface text-main border border-base rounded-sm">1H</button>
+                                <button class="px-2 py-0.5 text-[10px] text-muted">24H</button>
+                                <button class="px-2 py-0.5 text-[10px] text-muted">7D</button>
+                            </div>
+                        </div>
+                        <div class="h-[280px] w-full"><canvas id="revenueChart"></canvas></div>
+                    </div>
+
+                    <div class="col-span-1 bg-surface border border-base rounded-lg p-5 flex flex-col">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-sm font-semibold text-main">Revenue by Division</h2>
+                            <i class="fa-solid fa-ellipsis text-muted"></i>
+                        </div>
+                        <div class="h-[180px] w-full relative flex justify-center"><canvas id="divisionChart"></canvas></div>
+                        
+                        <div class="mt-4 space-y-3 flex-1">
+                            <div>
+                                <div class="flex justify-between text-[11px] mb-1"><span class="text-muted">Enterprise Software</span> <span class="font-mono">75%</span></div>
+                                <div class="progress-track"><div class="progress-fill" style="width: 75%; background-color: #6366f1;"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-[11px] mb-1"><span class="text-muted">Hardware & IoT</span> <span class="font-mono">20%</span></div>
+                                <div class="progress-track"><div class="progress-fill" style="width: 20%; background-color: #8b5cf6;"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-[11px] mb-1"><span class="text-muted">Professional Services</span> <span class="font-mono">5%</span></div>
+                                <div class="progress-track"><div class="progress-fill" style="width: 5%; background-color: #3b82f6;"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-surface border border-base rounded-lg overflow-hidden">
+                    <div class="p-4 border-b border-base flex justify-between items-center bg-header">
+                        <h3 class="font-semibold text-sm text-main">Top Performing Regions</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse data-table">
+                            <thead>
+                                <tr>
+                                    <th>Region</th>
+                                    <th>Manager</th>
+                                    <th>Active Accounts</th>
+                                    <th>QTD Revenue</th>
+                                    <th>Growth (YoY)</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="font-mono text-[11px] text-main">
+                                <tr>
+                                    <td class="font-semibold font-sans">North America (East)</td>
+                                    <td>Sarah Jenkins</td>
+                                    <td>4,192</td>
+                                    <td>$12.4M</td>
+                                    <td class="text-green-500">+14.2%</td>
+                                    <td><span class="bg-green-500/10 text-green-600 border border-green-500/20 px-2 py-0.5 rounded-sm text-[9px] uppercase tracking-wider font-sans font-bold">On Track</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold font-sans">EMEA (Central)</td>
+                                    <td>Marcus Voller</td>
+                                    <td>2,096</td>
+                                    <td>$8.1M</td>
+                                    <td class="text-green-500">+8.4%</td>
+                                    <td><span class="bg-green-500/10 text-green-600 border border-green-500/20 px-2 py-0.5 rounded-sm text-[9px] uppercase tracking-wider font-sans font-bold">On Track</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold font-sans">APAC (Tokyo)</td>
+                                    <td>Kenji Sato</td>
+                                    <td>1,048</td>
+                                    <td>$3.2M</td>
+                                    <td class="text-red-500">-2.1%</td>
+                                    <td><span class="bg-yellow-500/10 text-yellow-600 border border-yellow-500/20 px-2 py-0.5 rounded-sm text-[9px] uppercase tracking-wider font-sans font-bold">Review Needed</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-transactions" class="view-section">
+                <div class="bg-surface border border-base rounded-lg overflow-hidden">
+                    <div class="p-4 border-b border-base flex justify-between items-center bg-header">
+                        <h3 class="font-semibold text-sm text-main">Global Transaction Feed</h3>
+                        <span class="pulse-slow status-dot status-live"></span>
+                    </div>
+                    <table class="w-full text-left border-collapse data-table">
+                        <thead><tr><th>Time</th><th>TxID</th><th>Customer</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead>
+                        <tbody id="transaction-tbody" class="font-mono text-[11px] text-main">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="view-generic" class="view-section">
+                <div class="flex flex-col items-center justify-center h-64 border-2 border-dashed border-base rounded-lg text-muted">
+                    <i class="fa-solid fa-screwdriver-wrench text-3xl mb-4"></i>
+                    <h2 class="text-lg font-semibold text-main">Module Under Maintenance</h2>
+                    <p class="text-sm">This section of the ERP is currently being upgraded.</p>
+                </div>
+            </div>
+
+        </main>
+
+        <aside id="ai-drawer" class="slide-left-drawer fixed right-0 top-14 bottom-0 w-[320px] bg-surface border-l border-base z-40 shadow-2xl flex flex-col transition-colors">
+            <div class="p-4 border-b border-base flex justify-between items-center bg-header">
+                <h3 class="font-bold text-sm text-main flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles text-indigo-500"></i> Nexus Business AI</h3>
+                <button id="close-copilot" class="text-muted hover:text-main"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
+                
+                <div class="bg-indigo-500/10 border border-indigo-500/20 p-3 rounded-lg">
+                    <p class="text-indigo-600 dark:text-indigo-400 font-semibold mb-1 flex items-center gap-2"><i class="fa-solid fa-bolt"></i> Sales Anomaly Detected</p>
+                    <p class="text-main leading-relaxed">Enterprise software sales in <span class="font-mono">NA-East</span> spiked by 240% over the last 15 minutes. This correlates with the new Q3 marketing campaign launch.</p>
+                </div>
+
+                <div class="bg-base border border-base p-3 rounded-lg">
+                    <p class="text-muted font-semibold mb-1 flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation"></i> Supply Chain Alert</p>
+                    <p class="text-main leading-relaxed">Inventory for SKU-8891 (Server Racks) is running low in the Frankfurt distribution center. Automated restock PO has been drafted.</p>
+                    <button class="mt-2 text-indigo-500 font-medium hover:text-indigo-400">Review Purchase Order &rarr;</button>
+                </div>
+
+                <div class="bg-base border border-base p-3 rounded-lg">
+                    <p class="text-muted font-semibold mb-1 flex items-center gap-2"><i class="fa-solid fa-money-bill-wave"></i> Financial Projection</p>
+                    <p class="text-main leading-relaxed">Account 'Acme Corp' is 30 days overdue on invoice #INV-992. Recommended action: Trigger automated follow-up sequence.</p>
+                </div>
+
+            </div>
+            <div class="p-4 border-t border-base">
+                <div class="relative">
+                    <input type="text" placeholder="Ask AI to query ERP data..." class="w-full bg-base border border-base rounded-full py-2 pl-4 pr-10 text-xs text-main focus:outline-none focus:border-indigo-500 transition-colors">
+                    <button class="absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-white"><i class="fa-solid fa-arrow-up text-[10px]"></i></button>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+    <div id="terminal-drawer" class="slide-up-terminal fixed bottom-0 left-[240px] right-0 h-[250px] bg-base border-t border-base z-50 flex flex-col font-mono shadow-[0_-10px_40px_rgba(0,0,0,0.2)] transition-colors">
+        <div class="h-8 border-b border-base bg-header flex justify-between items-center px-4 shrink-0">
+            <div class="flex items-center gap-3 text-[10px] text-muted uppercase tracking-widest font-sans font-bold">
+                <span class="text-green-500"><i class="fa-solid fa-circle-play mr-1"></i> Live Stream</span>
+                <span>/var/log/nexus/operations.log</span>
+            </div>
+            <div class="flex gap-3 text-muted">
+                <i class="fa-solid fa-down-left-and-up-right-to-center cursor-pointer hover:text-main text-[10px]"></i>
+                <i id="close-terminal" class="fa-solid fa-xmark cursor-pointer hover:text-main text-xs"></i>
+            </div>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4 text-[11px]" id="terminal-output">
+            </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Realtime Clock ---
+            const clockEl = document.getElementById('clock');
+            setInterval(() => {
+                const now = new Date();
+                clockEl.innerText = now.toISOString().split('T')[1].split('.')[0] + ' UTC';
+            }, 1000);
+
+            // --- Dark/Light Mode Toggle ---
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = themeToggle.querySelector('i');
+            
+            themeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('light-mode');
+                
+                if (document.body.classList.contains('light-mode')) {
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                } else {
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                }
+                
+                // Update chart grid colors based on theme
+                const gridColor = getComputedStyle(document.body).getPropertyValue('--chart-grid').trim();
+                throughputChart.options.scales.y.grid.color = gridColor;
+                throughputChart.update();
+            });
+
+            // --- Sidebar Navigation Logic ---
+            const navItems = document.querySelectorAll('.nav-item');
+            const viewSections = document.querySelectorAll('.view-section');
+            const viewTitle = document.getElementById('view-title');
+            const genericView = document.getElementById('view-generic');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    // Update active styling
+                    navItems.forEach(nav => nav.classList.remove('nav-active'));
+                    item.classList.add('nav-active');
+
+                    // Get Target
+                    const targetId = item.getAttribute('data-target');
+                    const targetView = document.getElementById(targetId);
+
+                    // Hide all views
+                    viewSections.forEach(section => section.classList.remove('active'));
+
+                    // Show selected view or generic view if not explicitly defined
+                    if(targetView) {
+                        targetView.classList.add('active');
+                    } else {
+                        genericView.classList.add('active');
+                    }
+
+                    // Update Header Title
+                    viewTitle.innerText = item.innerText.trim();
+                });
+            });
+
+            // --- Drawer Toggles ---
+            const terminal = document.getElementById('terminal-drawer');
+            const toggleTermBtn = document.getElementById('toggle-terminal');
+            const closeTermBtn = document.getElementById('close-terminal');
+            
+            toggleTermBtn.addEventListener('click', () => terminal.classList.toggle('open'));
+            closeTermBtn.addEventListener('click', () => terminal.classList.remove('open'));
+
+            const copilot = document.getElementById('ai-drawer');
+            const toggleCopilotBtn = document.getElementById('toggle-copilot');
+            const closeCopilotBtn = document.getElementById('close-copilot');
+
+            toggleCopilotBtn.addEventListener('click', () => copilot.classList.toggle('open'));
+            closeCopilotBtn.addEventListener('click', () => copilot.classList.remove('open'));
+
+            // --- Charts Integration ---
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.color = '#71717a'; 
+            
+            // Revenue Line Chart
+            const ctxMain = document.getElementById('revenueChart').getContext('2d');
+            let gradient = ctxMain.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(99, 102, 241, 0.4)'); 
+            gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+
+            const throughputChart = new Chart(ctxMain, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 20}, (_, i) => `-${20-i}m`),
+                    datasets: [{
+                        label: 'Sales Volume ($K)',
+                        data: [21, 22, 21, 24, 23, 25, 28, 31, 35, 32, 34, 41, 45, 42, 48, 52, 51, 55, 53, 58],
+                        borderColor: '#6366f1',
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: { backgroundColor: 'rgba(0,0,0,0.8)', titleColor: '#fff', bodyColor: '#fff' }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, grid: { color: '#27272a' }, ticks: { callback: (val) => '$' + val + 'k' } }
+                    }
+                }
+            });
+
+            setInterval(() => {
+                const data = throughputChart.data.datasets[0].data;
+                const lastVal = data[data.length - 1];
+                const newVal = lastVal + (Math.random() - 0.4) * 5; 
+                data.shift();
+                data.push(Math.max(10, newVal)); 
+                throughputChart.update('none'); 
+            }, 3000);
+
+            // Modality/Division Doughnut Chart
+            const ctxModality = document.getElementById('divisionChart').getContext('2d');
+            new Chart(ctxModality, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Software', 'Hardware', 'Services'],
+                    datasets: [{
+                        data: [75, 20, 5],
+                        backgroundColor: ['#6366f1', '#8b5cf6', '#3b82f6'],
+                        borderWidth: 0,
+                        cutout: '80%'
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(0,0,0,0.8)' } }
+                }
+            });
+
+            // --- Dummy Data Generation for Transactions ---
+            const txBody = document.getElementById('transaction-tbody');
+            const companies = ["Globex Corp", "Soylent Corp", "Initech", "Umbrella Corp", "Massive Dynamic"];
+            const methods = ["Wire Transfer", "Credit Card", "ACH", "Crypto"];
+            
+            for(let i=0; i<15; i++) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>-${i+1}m</td>
+                    <td>TX-${Math.floor(Math.random()*100000)}</td>
+                    <td>${companies[Math.floor(Math.random()*companies.length)]}</td>
+                    <td>$${(Math.random()*5000 + 100).toFixed(2)}</td>
+                    <td>${methods[Math.floor(Math.random()*methods.length)]}</td>
+                    <td><span class="text-green-500">Cleared</span></td>
+                `;
+                txBody.appendChild(tr);
+            }
+
+            // --- Fake Terminal Log Generator ---
+            const terminalOutput = document.getElementById('terminal-output');
+            const logTypes = [
+                { class: 'log-info', text: 'INFO [sales] Order #9921 processed successfully via Stripe gateway.' },
+                { class: 'log-success', text: 'SUCCESS [auth] Admin user "Sarah J." authenticated into HR portal.' },
+                { class: 'log-info', text: 'INFO [inventory] Routine stock sync completed across 4 NA warehouses.' },
+                { class: 'log-warn', text: 'WARN [supply-chain] Shipment TRK-102 delayed at customs in EU-West.' },
+                { class: 'log-success', text: 'SUCCESS [finance] Invoice INV-0044 marked as PAID ($45,200).' },
+                { class: 'log-info', text: 'INFO [marketing] Campaign "Q3_Push" triggered 45 new lead entries.' },
+                { class: 'log-err', text: 'ERR [integration] Timeout reaching external logistics API (retry 1/3).' }
+            ];
+
+            function addLog() {
+                if(!terminal.classList.contains('open')) return; 
+                
+                const now = new Date();
+                const timeStr = now.toISOString().split('T')[1].replace('Z', '');
+                const randomLog = logTypes[Math.floor(Math.random() * logTypes.length)];
+                
+                const line = document.createElement('div');
+                line.className = 'log-line';
+                line.innerHTML = `<span class="log-time">[${timeStr}]</span> <span class="${randomLog.class}">${randomLog.text}</span>`;
+                
+                terminalOutput.appendChild(line);
+                
+                if (terminalOutput.children.length > 50) {
+                    terminalOutput.removeChild(terminalOutput.firstChild);
+                }
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            }
+            setInterval(addLog, 400);
+        });
+        let pctEl = document.getElementById('loadPct');
+let pct = 0;
+
+// Increment the percentage randomly to simulate loading
+let pctInterval = setInterval(() => {
+  if (pct < 100) {
+    pct += Math.random() * 4;
+    if (pct > 100) pct = 100;
+    pctEl.textContent = Math.floor(pct) + '%';
+  }
+}, 60);
+
+// Transition out after 3 seconds
+setTimeout(() => {
+  clearInterval(pctInterval);
+  pctEl.textContent = '100%';
+  
+  const loader = document.getElementById('loader');
+  loader.classList.add('loader-exit');
+  
+  // Hide the element completely after the exit animation completes
+  setTimeout(() => {
+    loader.style.display = 'none';
+    
+    // Add logic here to initialize or reveal your main application
+    console.log("Loading complete. Ready to show main app.");
+    
+  }, 700);
+}, 3000);
+
+    </script>
+</body>
+</html>
