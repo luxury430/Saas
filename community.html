@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>NEUROFORGE COMMUNITY</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent!important;outline:none!important;}
+button,input,textarea{font-family:'DM Sans',sans-serif;-webkit-tap-highlight-color:transparent!important;outline:none!important;}
+input:focus,textarea:focus,button:focus{outline:none!important;}
+
+:root{
+  --g1:#00e5b0;
+  --g2:#00c49a;
+  --g3:#00a882;
+  --cyan:#3df0d4;
+  --lime:#a3ffb8;
+  --gold:#f5c842;
+  --navy-900:#020b12;
+  --navy-800:#040f18;
+  --navy-700:#071520;
+  --navy-600:#0c1e2e;
+  --navy-500:#112437;
+  --navy-400:#162d42;
+  --navy-300:#1c3850;
+  --text-100:#e8f8f5;
+  --text-200:#9ecfbf;
+  --text-300:#5a8a7a;
+  --text-400:#385a50;
+  --border:rgba(0,229,176,.10);
+  --border2:rgba(0,229,176,.06);
+  --glow:0 0 28px rgba(0,229,176,.32);
+  --glow2:0 0 20px rgba(61,240,212,.2);
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-t:env(safe-area-inset-top,0px);
+  --grad-main:linear-gradient(135deg,#00e5b0,#00c49a);
+  --grad-msg:linear-gradient(135deg,#0c1e2e,#112437);
+  --grad-bg:radial-gradient(ellipse at 20% 20%,rgba(0,229,176,.05) 0%,transparent 55%),
+            radial-gradient(ellipse at 80% 80%,rgba(61,240,212,.04) 0%,transparent 55%);
+}
+
+html,body{width:100%;height:100%;overflow:hidden;background:var(--navy-900);
+  font-family:'DM Sans',sans-serif;color:var(--text-100);-webkit-font-smoothing:antialiased;}
+
+/* ══ INTRO ══════════════════════════════════════════════════ */
+#introWrap{position:fixed;inset:0;z-index:9000;background:#010a10;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;}
+#introCanvas{position:absolute;inset:0;width:100%;height:100%;}
+#introUI{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;pointer-events:none;}
+
+#introLogo{font-family:'Syne',sans-serif;font-weight:800;
+  font-size:clamp(1.8rem,6vw,5.5rem);letter-spacing:0.28em;padding-right:0.28em;
+  text-transform:uppercase;line-height:1;
+  background:linear-gradient(140deg,#ffffff 0%,#00e5b0 45%,#3df0d4 75%,#a3ffb8 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  opacity:0;filter:blur(24px) brightness(3);transform:scale(1.06);
+  transition:opacity 1.8s cubic-bezier(.16,1,.3,1),filter 1.8s cubic-bezier(.16,1,.3,1),transform 1.8s cubic-bezier(.16,1,.3,1);}
+#introLogo.show{opacity:1;filter:blur(0) brightness(1);transform:scale(1);}
+
+#introSub{font-family:'Syne',sans-serif;font-weight:600;
+  font-size:clamp(.55rem,1.2vw,.72rem);letter-spacing:0.55em;padding-right:0.55em;
+  text-transform:uppercase;
+  background:linear-gradient(90deg,#00e5b0,#3df0d4);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  opacity:0;transform:translateY(10px);
+  transition:opacity 1.4s cubic-bezier(.16,1,.3,1) .4s,transform 1.4s cubic-bezier(.16,1,.3,1) .4s;}
+#introSub.show{opacity:1;transform:translateY(0);}
+
+#introRule{width:0;height:1px;margin:clamp(10px,1.8vw,20px) 0;opacity:0;
+  background:linear-gradient(90deg,transparent,rgba(0,229,176,.6),rgba(163,255,184,.4),rgba(0,229,176,.6),transparent);
+  transition:width 1.5s cubic-bezier(.16,1,.3,1) .2s,opacity .6s ease .2s;}
+#introRule.show{width:clamp(80px,20vw,240px);opacity:1;}
+
+#introTag{font-size:clamp(.42rem,1vw,.62rem);letter-spacing:0.45em;padding-right:0.45em;
+  text-transform:uppercase;color:rgba(0,229,176,.45);
+  opacity:0;transform:translateY(6px);
+  transition:opacity 1.2s ease .6s,transform 1.2s ease .6s;}
+#introTag.show{opacity:1;transform:translateY(0);}
+
+#introBar{position:absolute;bottom:clamp(32px,5vw,60px);left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:7px;
+  opacity:0;transition:opacity .5s ease 1.2s;}
+#introBar.show{opacity:1;}
+#introBarTrack{width:clamp(90px,16vw,160px);height:1.5px;background:rgba(0,229,176,.1);border-radius:2px;overflow:hidden;}
+#introBarFill{height:100%;width:0%;background:linear-gradient(90deg,#00e5b0,#3df0d4,#a3ffb8);border-radius:2px;transition:width 0s linear;}
+#introBarLabel{font-size:8.5px;letter-spacing:.22em;color:rgba(0,229,176,.3);text-transform:uppercase;}
+
+#introFade{position:fixed;inset:0;background:#010a10;z-index:9100;opacity:0;pointer-events:none;}
+
+/* ══ APP SHELL ══════════════════════════════════════════════ */
+#app{position:fixed;inset:0;display:flex;opacity:0;pointer-events:none;transition:opacity .9s ease;}
+#app.ready{opacity:1;pointer-events:all;}
+
+/* ══ ICON RAIL ══════════════════════════════════════════════ */
+.icon-rail{width:clamp(50px,5vw,64px);background:var(--navy-900);
+  border-right:1px solid var(--border2);
+  display:flex;flex-direction:column;align-items:center;
+  padding:clamp(12px,2vw,20px) 0 calc(clamp(12px,2vw,20px) + var(--safe-b));
+  gap:clamp(5px,1vw,9px);flex-shrink:0;}
+
+.rail-logo{width:36px;height:36px;border-radius:10px;background:var(--grad-main);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--glow);margin-bottom:4px;flex-shrink:0;cursor:pointer;}
+.rail-logo svg{width:20px;height:20px;}
+.rail-divider{width:26px;height:1px;background:var(--border);flex-shrink:0;}
+
+.rail-btn{width:36px;height:36px;border-radius:10px;border:none;
+  background:var(--navy-700);color:var(--text-300);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .22s;flex-shrink:0;position:relative;}
+.rail-btn:hover,.rail-btn.active{background:var(--g1);color:var(--navy-900);border-radius:13px;box-shadow:var(--glow);}
+.rail-btn svg{width:16px;height:16px;}
+.rail-badge{position:absolute;top:1px;right:1px;width:13px;height:13px;border-radius:50%;
+  background:var(--gold);color:var(--navy-900);font-size:7.5px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;border:2px solid var(--navy-900);}
+
+/* ══ SIDEBAR ════════════════════════════════════════════════ */
+.sidebar {
+  width: clamp(210px,22vw,268px);
+
+  background: linear-gradient(
+    180deg,
+    rgba(10, 25, 35, 0.75),
+    rgba(10, 25, 35, 0.55)
+  );
+
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+
+  border-right: 1px solid rgba(255,255,255,0.06);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 0 40px rgba(0,229,176,0.08);
+
+  position: relative;
+  z-index: 20;
+
+  display:flex;
+  flex-direction:column;
+  flex-shrink:0;
+
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+.sidebar-head{padding:clamp(14px,2vw,22px) clamp(14px,1.8vw,20px);
+  border-bottom:1px solid var(--border2);
+  display:flex;flex-direction:column;gap:12px;flex-shrink:0;
+  background:linear-gradient(180deg,rgba(0,229,176,.04) 0%,transparent 100%);}
+
+.server-banner{display:flex;align-items:center;gap:10px;cursor:pointer;
+  padding:8px 10px;border-radius:10px;transition:background .18s;margin:-4px -4px 0;}
+.server-banner:hover{background:rgba(0,229,176,.06);}
+
+.server-icon{width:38px;height:38px;border-radius:10px;background:var(--grad-main);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:var(--glow);}
+.server-icon svg{width:20px;height:20px;}
+
+.server-info{flex:1;min-width:0;}
+.server-name{font-family:'Syne',sans-serif;font-weight:800;font-size:12.5px;
+  color:var(--text-100);letter-spacing:.06em;line-height:1.2;
+  background:linear-gradient(90deg,#e8f8f5,#00e5b0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.server-meta{font-size:9.5px;color:var(--text-300);letter-spacing:.04em;margin-top:1px;
+  display:flex;align-items:center;gap:5px;}
+.server-meta::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--g1);
+  box-shadow:0 0 6px rgba(0,229,176,.6);flex-shrink:0;}
+
+.server-badge{font-size:7.5px;letter-spacing:.1em;background:rgba(0,229,176,.12);
+  color:var(--g1);padding:2px 6px;border-radius:4px;font-weight:600;border:1px solid rgba(0,229,176,.2);
+  white-space:nowrap;}
+
+.search-box{display:flex;align-items:center;gap:8px;
+  background:var(--navy-700);border:1px solid var(--border);
+  border-radius:8px;padding:7px 11px;transition:border-color .18s;}
+.search-box:focus-within{border-color:rgba(0,229,176,.3);}
+.search-box svg{width:12px;height:12px;color:var(--text-400);flex-shrink:0;}
+.search-box input{background:none;border:none;color:var(--text-100);font-size:12px;width:100%;}
+.search-box input::placeholder{color:var(--text-400);}
+
+/* CTA Strip in Sidebar */
+.sidebar-cta-strip{
+  display:flex;gap:6px;padding:0 clamp(14px,1.8vw,20px) 12px;flex-shrink:0;}
+.scta-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;
+  padding:8px 6px;border-radius:8px;border:none;cursor:pointer;
+  font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:600;
+  letter-spacing:.03em;transition:all .2s;}
+.scta-btn.primary{background:var(--grad-main);color:var(--navy-900);box-shadow:var(--glow);}
+.scta-btn.primary:hover{transform:translateY(-1px);box-shadow:0 0 32px rgba(0,229,176,.45);}
+.scta-btn.secondary{background:var(--navy-600);color:var(--text-200);border:1px solid var(--border);}
+.scta-btn.secondary:hover{background:var(--navy-500);color:var(--text-100);}
+.scta-btn svg{width:12px;height:12px;}
+
+.channels-wrap{flex:1;overflow-y:auto;padding:8px 8px;
+  scrollbar-width:thin;scrollbar-color:var(--navy-600) transparent;}
+.channels-wrap::-webkit-scrollbar{width:3px;}
+.channels-wrap::-webkit-scrollbar-thumb{background:var(--navy-600);border-radius:3px;}
+
+.ch-section{padding:14px 10px 5px;font-size:9.5px;font-weight:700;
+  letter-spacing:.15em;color:var(--text-400);text-transform:uppercase;
+  display:flex;align-items:center;gap:8px;}
+.ch-section::after{content:'';flex:1;height:1px;background:var(--border2);}
+
+.ch-item{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:7px;
+  cursor:pointer;transition:all .18s;color:var(--text-300);font-size:12.5px;position:relative;}
+.ch-item:hover{background:var(--navy-600);color:var(--text-200);}
+.ch-item.active{background:var(--navy-500);color:var(--text-100);}
+.ch-item.active::before{content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);
+  width:3px;height:55%;border-radius:0 2px 2px 0;background:var(--g1);box-shadow:var(--glow);}
+.ch-item svg{width:13px;height:13px;flex-shrink:0;opacity:.55;}
+.ch-item.active svg{opacity:1;color:var(--g1);}
+.ch-badge{margin-left:auto;background:var(--g1);color:var(--navy-900);
+  font-size:8.5px;font-weight:700;padding:2px 5px;border-radius:7px;min-width:16px;text-align:center;}
+
+.sidebar-user{display:flex;align-items:center;gap:10px;
+  padding:clamp(10px,1.5vw,14px) clamp(14px,1.8vw,20px);
+  border-top:1px solid var(--border2);background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(10px);flex-shrink:0;
+  padding-bottom:calc(clamp(10px,1.5vw,14px) + var(--safe-b));}
+.su-avatar{width:32px;height:32px;border-radius:50%;background:var(--grad-main);
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+  flex-shrink:0;box-shadow:var(--glow);}
+.su-info{flex:1;min-width:0;}
+.su-name{font-size:12px;font-weight:600;color:var(--text-100);}
+.su-status{font-size:10px;color:var(--g1);display:flex;align-items:center;gap:4px;}
+.su-status::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--g1);
+  box-shadow:0 0 5px rgba(0,229,176,.7);flex-shrink:0;}
+.su-actions{display:flex;gap:2px;}
+.su-act-btn{width:26px;height:26px;border-radius:6px;border:none;background:none;
+  color:var(--text-400);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.su-act-btn:hover{background:var(--navy-600);color:var(--text-200);}
+.su-act-btn svg{width:13px;height:13px;}
+
+/* ══ CHAT COLUMN ════════════════════════════════════════════ */
+.chat-col {
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+
+  background:
+    radial-gradient(circle at 20% 20%, rgba(0,229,176,0.08), transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(61,240,212,0.06), transparent 40%),
+    #020b12;
+}
+
+.chat-head{padding:0 clamp(14px,2vw,24px);height:clamp(54px,6vh,68px);
+  display:flex;align-items:center;justify-content:space-between;
+  
+  background:rgba(4,15,24,.75);flex-shrink:0;
+  background: rgba(10, 25, 35, 0.6);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  border-bottom: 1px solid rgba(255,255,255,0.05);}
+
+.ch-head-left{display:flex;align-items:center;gap:10px;min-width:0;}
+.ch-head-icon{width:30px;height:30px;border-radius:8px;background:rgba(0,229,176,.1);
+  display:flex;align-items:center;justify-content:center;color:var(--g1);}
+.ch-head-icon svg{width:14px;height:14px;}
+
+/* Clickable group name */
+.ch-head-name-wrap{cursor:pointer;padding:4px 8px;border-radius:7px;transition:background .18s;}
+.ch-head-name-wrap:hover{background:rgba(0,229,176,.08);}
+.ch-head-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text-100);}
+.ch-head-topic{font-size:11px;color:var(--text-300);margin-top:1px;}
+
+.ch-head-right{display:flex;align-items:center;gap:4px;}
+.hdr-btn{width:32px;height:32px;border-radius:8px;border:none;background:none;
+  color:var(--text-300);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;}
+.hdr-btn:hover{background:var(--navy-600);color:var(--text-100);}
+.hdr-btn svg{width:15px;height:15px;}
+
+/* Header CTA Buttons */
+.hdr-cta{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;
+  border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:600;
+  letter-spacing:.03em;transition:all .2s;}
+.hdr-cta.green{background:rgba(0,229,176,.15);color:var(--g1);border:1px solid rgba(0,229,176,.25);}
+.hdr-cta.green:hover{background:rgba(0,229,176,.25);box-shadow:var(--glow2);}
+.hdr-cta.ghost{background:var(--navy-600);color:var(--text-200);border:1px solid var(--border);}
+.hdr-cta.ghost:hover{background:var(--navy-500);color:var(--text-100);}
+.hdr-cta svg{width:12px;height:12px;}
+@media(max-width:900px){.hdr-cta span{display:none;}.hdr-cta{padding:6px 8px;}}
+
+/* Pinned bar */
+.pinned-bar{display:flex;align-items:center;gap:10px;
+  padding:8px clamp(14px,2vw,24px);
+  background:rgba(0,229,176,.05);border-bottom:1px solid rgba(0,229,176,.09);
+  font-size:11.5px;color:var(--g1);cursor:pointer;flex-shrink:0;transition:background .18s;}
+.pinned-bar:hover{background:rgba(0,229,176,.09);}
+.pinned-bar svg{width:12px;height:12px;flex-shrink:0;}
+.pinned-bar span{color:var(--text-200);}
+
+/* Messages */
+.messages{flex:1;overflow-y:auto;padding:clamp(12px,2vw,22px);
+  display:flex;flex-direction:column;gap:2px;
+  scrollbar-width:thin;scrollbar-color:var(--navy-600) transparent;}
+.messages::-webkit-scrollbar{width:4px;}
+.messages::-webkit-scrollbar-thumb{background:var(--navy-600);border-radius:4px;}
+
+.date-sep{display:flex;align-items:center;gap:12px;margin:16px 0;user-select:none;}
+.date-sep::before,.date-sep::after{content:'';flex:1;height:1px;background:var(--border2);}
+.date-sep span{font-size:10px;color:var(--text-400);font-weight:600;letter-spacing:.06em;
+  background:var(--navy-700);padding:3px 11px;border-radius:20px;border:1px solid var(--border2);white-space:nowrap;}
+
+.msg-row{display:flex;gap:12px;padding:4px 10px;border-radius:10px;
+  transition:background .12s;cursor:default;position:relative;}
+.msg-row:hover{background:rgba(0,229,176,.025);}
+.msg-row.compact{padding-top:2px;padding-bottom:2px;}
+
+.msg-avatar{width:36px;height:36px;border-radius:50%;background:var(--navy-600);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;margin-top:2px;overflow:hidden;}
+
+.msg-body{flex:1;min-width:0;}
+.msg-meta{display:flex;align-items:baseline;gap:8px;margin-bottom:3px;}
+.msg-author{font-size:13px;font-weight:600;color:var(--text-100);cursor:pointer;}
+.msg-author:hover{text-decoration:underline;color:var(--g1);}
+.msg-author.bot{color:var(--g1);}
+.msg-author.mod{color:var(--gold);}
+.msg-time{font-size:10px;color:var(--text-400);}
+.author-badge{font-size:8.5px;font-weight:700;padding:1px 5px;border-radius:3px;
+  vertical-align:middle;margin-left:1px;}
+.author-badge.bot-badge{background:rgba(0,229,176,.2);color:var(--g1);border:1px solid rgba(0,229,176,.3);}
+.author-badge.mod-badge{background:rgba(245,200,66,.15);color:var(--gold);border:1px solid rgba(245,200,66,.3);}
+
+.msg-text{font-size:13px;line-height:1.6;color:var(--text-200);word-break:break-word;}
+.msg-text code{background:var(--navy-600);padding:1px 5px;border-radius:3px;
+  font-family:monospace;font-size:11.5px;color:var(--g1);border:1px solid var(--border);}
+.msg-text .mention{background:rgba(0,229,176,.12);color:var(--g1);
+  padding:1px 4px;border-radius:4px;font-weight:500;}
+.msg-text strong{color:var(--text-100);}
+
+/* Analytics image cards in messages */
+.msg-analytics-card{margin-top:8px;border-radius:10px;overflow:hidden;
+  border:1px solid var(--border);background:var(--navy-700);max-width:340px;}
+.mac-header{padding:10px 14px 8px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border2);}
+.mac-title{font-size:11px;font-weight:600;color:var(--text-200);letter-spacing:.04em;}
+.mac-badge{font-size:9px;padding:2px 7px;border-radius:4px;font-weight:700;}
+.mac-badge.up{background:rgba(0,229,176,.15);color:var(--g1);}
+.mac-badge.down{background:rgba(245,200,66,.15);color:var(--gold);}
+.mac-chart{padding:12px 14px 10px;display:flex;align-items:flex-end;gap:4px;height:70px;}
+.mac-bar{flex:1;background:linear-gradient(180deg,rgba(0,229,176,.7),rgba(0,196,154,.3));
+  border-radius:3px 3px 0 0;transition:height .3s;position:relative;}
+.mac-bar.highlight{background:linear-gradient(180deg,#00e5b0,rgba(0,229,176,.5));
+  box-shadow:0 0 8px rgba(0,229,176,.3);}
+.mac-footer{padding:6px 14px 10px;display:flex;justify-content:space-between;align-items:center;}
+.mac-stat{text-align:center;}
+.mac-stat-val{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;
+  color:var(--g1);line-height:1;}
+.mac-stat-lbl{font-size:9px;color:var(--text-400);margin-top:1px;}
+
+/* Mini donut chart card */
+.msg-kpi-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.kpi-chip{display:flex;align-items:center;gap:8px;background:var(--navy-700);
+  border:1px solid var(--border);border-radius:8px;padding:8px 12px;}
+.kpi-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.kpi-info{}
+.kpi-val{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text-100);line-height:1;}
+.kpi-lbl{font-size:9.5px;color:var(--text-400);margin-top:1px;}
+
+.msg-reactions{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;}
+.reaction{display:flex;align-items:center;gap:4px;background:var(--navy-600);
+  border:1px solid var(--border);border-radius:12px;padding:3px 8px;
+  cursor:pointer;font-size:12px;transition:all .15s;}
+.reaction:hover{background:var(--navy-500);border-color:rgba(0,229,176,.25);}
+.reaction.mine{background:rgba(0,229,176,.12);border-color:rgba(0,229,176,.3);color:var(--g1);}
+.reaction span{font-size:11px;color:var(--text-300);}
+
+.quick-react{position:absolute;right:10px;top:4px;display:none;
+  background:var(--navy-600);border:1px solid var(--border);border-radius:8px;
+  padding:3px 6px;gap:2px;align-items:center;}
+.msg-row:hover .quick-react{display:flex;}
+.qr-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:2px;
+  border-radius:4px;transition:background .12s;}
+.qr-btn:hover{background:var(--navy-500);}
+
+/* Typing */
+.typing-row{display:flex;align-items:center;gap:10px;padding:6px 22px;flex-shrink:0;}
+.typing-dots{display:flex;gap:4px;align-items:center;}
+.typing-dots i{display:block;width:5px;height:5px;border-radius:50%;background:var(--g1);
+  animation:tdot 1.4s ease-in-out infinite;}
+.typing-dots i:nth-child(2){animation-delay:.2s;}
+.typing-dots i:nth-child(3){animation-delay:.4s;}
+@keyframes tdot{0%,80%,100%{transform:scale(.7);opacity:.4}40%{transform:scale(1);opacity:1}}
+
+/* Emoji panel */
+.emoji-panel{position:absolute;bottom:calc(100% + 8px);right:0;width:280px;
+  background:var(--navy-700);border:1px solid var(--border);
+  border-radius:12px;padding:10px;box-shadow:0 16px 48px rgba(0,0,0,.6);
+  display:none;z-index:200;backdrop-filter:blur(12px);}
+.emoji-panel.open{display:block;}
+.ep-cats{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;}
+.ep-cat{background:var(--navy-600);border:none;color:var(--text-300);
+  padding:5px 9px;border-radius:6px;cursor:pointer;font-size:11px;transition:all .15s;}
+.ep-cat.active,.ep-cat:hover{background:rgba(0,229,176,.15);color:var(--g1);}
+.ep-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;max-height:160px;overflow-y:auto;}
+.ep-emoji{background:none;border:none;font-size:18px;padding:3px;border-radius:5px;
+  cursor:pointer;transition:background .1s;}
+.ep-emoji:hover{background:var(--navy-500);}
+
+/* Input area */
+.input-area{padding:0 clamp(14px,2vw,22px) calc(clamp(12px,2vw,18px) + var(--safe-b));flex-shrink:0;}
+.input-toolbar{display:flex;align-items:center;gap:3px;padding:6px 4px 4px;}
+.tb-btn{width:28px;height:28px;border-radius:6px;border:none;background:none;
+  color:var(--text-400);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.tb-btn:hover{background:var(--navy-600);color:var(--text-200);}
+.tb-btn svg{width:14px;height:14px;}
+.tb-sep{width:1px;height:16px;background:var(--border);margin:0 4px;}
+
+.input-box{background:var(--navy-700);border:1.5px solid var(--border);border-radius:12px;
+  display:flex;align-items:flex-end;gap:6px;padding:8px 10px;position:relative;
+  transition:border-color .25s,box-shadow .25s;}
+.input-box:focus-within{border-color:rgba(0,229,176,.4);box-shadow:0 0 0 3px rgba(0,229,176,.06);}
+.input-glow{position:absolute;inset:-1px;border-radius:13px;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 110%,rgba(0,229,176,.08) 0%,transparent 60%);opacity:0;transition:opacity .3s;}
+.input-box:focus-within .input-glow{opacity:1;}
+
+.input-actions{display:flex;align-items:flex-end;gap:2px;flex-shrink:0;}
+.ia-btn{width:30px;height:30px;border-radius:7px;border:none;background:none;
+  color:var(--text-400);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.ia-btn:hover{background:var(--navy-600);color:var(--text-200);}
+.ia-btn svg{width:15px;height:15px;}
+.msg-textarea{flex:1;background:none;border:none;resize:none;
+  color:var(--text-100);font-size:13.5px;line-height:1.55;
+  min-height:30px;max-height:140px;overflow-y:auto;padding:3px 0;}
+.msg-textarea::placeholder{color:var(--text-400);}
+.send-btn-main{width:32px;height:32px;border-radius:8px;border:none;
+  background:var(--grad-main);color:var(--navy-900);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:all .2s;box-shadow:var(--glow);flex-shrink:0;}
+.send-btn-main:hover{transform:scale(1.08);box-shadow:0 0 24px rgba(0,229,176,.5);}
+.send-btn-main svg{width:14px;height:14px;}
+
+/* ══ MEMBERS PANEL ══════════════════════════════════════════ */
+.members-panel{width:clamp(180px,16vw,230px);background:var(--navy-800);
+  border-left:1px solid var(--border2);display:flex;flex-direction:column;flex-shrink:0;}
+.mp-head{padding:clamp(14px,2vw,20px) clamp(12px,1.5vw,18px) 8px;
+  font-family:'Syne',sans-serif;font-size:10.5px;font-weight:700;
+  letter-spacing:.12em;color:var(--text-400);text-transform:uppercase;
+  border-bottom:1px solid var(--border2);flex-shrink:0;}
+.members-list{flex:1;overflow-y:auto;padding:8px 8px;
+  scrollbar-width:thin;scrollbar-color:var(--navy-600) transparent;}
+.members-list::-webkit-scrollbar{width:3px;}
+.members-list::-webkit-scrollbar-thumb{background:var(--navy-600);border-radius:3px;}
+.member-section{padding:10px 8px 4px;font-size:9.5px;font-weight:700;
+  letter-spacing:.14em;color:var(--text-400);text-transform:uppercase;}
+.member-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:7px;
+  cursor:pointer;transition:background .15s;}
+.member-row:hover{background:var(--navy-600);}
+.m-avatar{width:28px;height:28px;border-radius:50%;background:var(--navy-600);
+  display:flex;align-items:center;justify-content:center;font-size:13px;
+  flex-shrink:0;position:relative;}
+.m-status-dot{position:absolute;bottom:0;right:0;width:8px;height:8px;border-radius:50%;
+  background:var(--g1);border:2px solid var(--navy-800);box-shadow:0 0 4px rgba(0,229,176,.5);}
+.m-status-dot.offline{background:var(--text-400);box-shadow:none;}
+.m-name{font-size:11.5px;color:var(--text-300);}
+.m-name.online-name{color:var(--text-200);}
+.m-role-badge{font-size:8px;padding:1px 5px;border-radius:3px;margin-left:2px;font-weight:700;}
+.m-role-badge.mod{background:rgba(245,200,66,.15);color:var(--gold);}
+.m-role-badge.bot{background:rgba(0,229,176,.15);color:var(--g1);}
+
+/* ══ MEMBERS MODAL ══════════════════════════════════════════ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:800;
+  backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--navy-800);border:1px solid var(--border);border-radius:16px;
+  width:clamp(300px,90vw,460px);max-height:80vh;display:flex;flex-direction:column;
+  box-shadow:0 32px 80px rgba(0,0,0,.7);}
+.modal-head{padding:20px 24px 16px;border-bottom:1px solid var(--border2);
+  display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;}
+.modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;
+  background:linear-gradient(90deg,#e8f8f5,#00e5b0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.modal-sub{font-size:11.5px;color:var(--text-300);margin-top:3px;}
+.modal-close{width:30px;height:30px;border-radius:8px;border:none;background:var(--navy-700);
+  color:var(--text-300);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .15s;}
+.modal-close:hover{background:var(--navy-600);color:var(--text-100);}
+.modal-close svg{width:14px;height:14px;}
+.modal-stats{display:flex;gap:10px;padding:16px 24px;border-bottom:1px solid var(--border2);flex-shrink:0;}
+.modal-stat{flex:1;background:var(--navy-700);border-radius:10px;padding:12px;text-align:center;border:1px solid var(--border2);}
+.modal-stat-val{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;
+  background:linear-gradient(135deg,#00e5b0,#3df0d4);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.modal-stat-lbl{font-size:9.5px;color:var(--text-400);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;}
+.modal-members{flex:1;overflow-y:auto;padding:12px 24px 20px;
+  scrollbar-width:thin;scrollbar-color:var(--navy-600) transparent;}
+.modal-section-title{font-size:9.5px;font-weight:700;letter-spacing:.14em;
+  color:var(--text-400);text-transform:uppercase;padding:10px 0 6px;}
+.modal-member-row{display:flex;align-items:center;gap:10px;padding:7px 8px;
+  border-radius:8px;cursor:pointer;transition:background .15s;}
+.modal-member-row:hover{background:var(--navy-700);}
+.mm-avatar{width:34px;height:34px;border-radius:50%;background:var(--navy-600);
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+  flex-shrink:0;position:relative;}
+.mm-dot{position:absolute;bottom:0;right:0;width:9px;height:9px;border-radius:50%;
+  background:var(--g1);border:2px solid var(--navy-800);box-shadow:0 0 5px rgba(0,229,176,.5);}
+.mm-dot.offline{background:var(--text-400);box-shadow:none;}
+.mm-name{font-size:13px;font-weight:600;color:var(--text-100);}
+.mm-role{font-size:10px;color:var(--text-400);}
+.mm-badge{font-size:8.5px;padding:2px 6px;border-radius:4px;margin-left:auto;font-weight:700;}
+.mm-badge.mod{background:rgba(245,200,66,.15);color:var(--gold);border:1px solid rgba(245,200,66,.25);}
+.mm-badge.bot{background:rgba(0,229,176,.15);color:var(--g1);border:1px solid rgba(0,229,176,.25);}
+
+/* ══ TOAST ══════════════════════════════════════════════════ */
+.toast{position:fixed;bottom:clamp(20px,4vw,32px);left:50%;transform:translateX(-50%) translateY(8px);
+  background:var(--navy-600);border:1px solid var(--border);border-radius:10px;
+  padding:10px 18px;font-size:12.5px;color:var(--text-100);
+  box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:9999;pointer-events:none;
+  opacity:0;transition:opacity .25s,transform .25s;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ══ MOBILE ══════════════════════════════════════════════════ */
+@media(max-width:720px){
+  .members-panel{display:none!important;}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:50;
+    transform:translateX(calc(-100% - 64px));}
+  .sidebar.open{transform:translateX(0);}
+  .chat-col{width:100%;min-width:0;}
+  .input-toolbar{display:none;}
+  .quick-react{display:none!important;}
+  .emoji-panel{width:calc(100vw - 24px);left:12px;}
+  .pinned-bar{display:none;}
+  .hdr-cta span{display:none;}
+  .hdr-cta{padding:5px 7px;}
+  .sidebar-cta-strip{display:none;}
+}
+
+/* grain */
+body::after{content:'';position:fixed;inset:-60%;width:220%;height:220%;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:220px 220px;opacity:.015;pointer-events:none;z-index:9999;
+  animation:grainShift .65s steps(4) infinite;}
+@keyframes grainShift{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-1%,-2%)}100%{transform:translate(3%,1%)}}
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="introWrap">
+  <canvas id="introCanvas"></canvas>
+  <div id="introUI">
+    <div id="introLogo">NEUROFORGE</div>
+    <div id="introRule"></div>
+    <div id="introSub">COMMUNITY</div>
+    <div id="introTag">Forge The Future of Intelligence</div>
+  </div>
+  <div id="introBar">
+    <div id="introBarTrack"><div id="introBarFill"></div></div>
+    <div id="introBarLabel">Initializing Neural Engine</div>
+  </div>
+</div>
+<div id="introFade"></div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- Icon Rail -->
+  <div class="icon-rail">
+    <div class="rail-logo" onclick="showToast('⚡ NEUROFORGE')">
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9.5" stroke="white" stroke-width="1.5"/>
+        <path d="M7 17V9l5-3 5 3v8" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M9.5 17v-5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M14.5 17v-5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M9.5 12l2.5-1.5 2.5 1.5" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="rail-divider"></div>
+    <button class="rail-btn active" title="Community" onclick="showToast('🌐 Community')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </button>
+    <button class="rail-btn" title="Analytics" onclick="showToast('📊 Analytics Dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span class="rail-badge">3</span>
+    </button>
+    <button class="rail-btn" title="Forge Lab" onclick="showToast('⚗️ Forge Lab — coming soon')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+    </button>
+    <button class="rail-btn" title="Reports" onclick="showToast('📁 Reports')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    </button>
+    <div style="flex:1"></div>
+    <button class="rail-btn" title="Settings" onclick="showToast('⚙️ Settings')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+    <button class="rail-btn" id="mobileMenuBtn" style="display:none" onclick="toggleMobileSidebar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <!-- Clickable server banner -->
+      <div class="server-banner" onclick="openMembersModal()">
+        <div class="server-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9.5" stroke="white" stroke-width="1.5"/>
+            <path d="M7 17V9l5-3 5 3v8" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9.5 17v-5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+            <path d="M14.5 17v-5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="server-info">
+          <div class="server-name">NEUROFORGE COMMUNITY</div>
+          <div class="server-meta">247 online · 1,842 members</div>
+        </div>
+        <span class="server-badge">PRO</span>
+      </div>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" placeholder="Search channels..." id="channelSearch">
+      </div>
+    </div>
+
+    <!-- CTA Buttons strip -->
+    <div class="sidebar-cta-strip">
+      <button class="scta-btn primary" onclick="showToast('📊 Opening Dashboard...')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Dashboard
+      </button>
+      <button class="scta-btn secondary" onclick="showToast('📨 Invitations sent')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Invite
+      </button>
+    </div>
+
+    <div class="channels-wrap" id="channelsWrap">
+      <div class="ch-section">Information</div>
+      <div class="ch-item active" data-ch="announcements" onclick="switchChannel(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        announcements
+        <span class="ch-badge">2</span>
+      </div>
+      <div class="ch-item" data-ch="rules" onclick="switchChannel(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+        rules
+      </div>
+
+      <div class="ch-section">Business</div>
+      <div class="ch-item" data-ch="general" onclick="switchChannel(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        general
+        <span class="ch-badge">8</span>
+      </div>
+      <div class="ch-item" data-ch="analytics" onclick="switchChannel(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        analytics
+        <span class="ch-badge">5</span>
+      </div>
+      <div class="ch-item" data-ch="strategy" onclick="switchChannel(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        strategy
+      </div>
+      <div class="ch-item" data-ch="deals" onclick="switchChannel(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        deals-pipeline
+        <span class="ch-badge">3</span>
+      </div>
+
+      <div class="ch-section">Engineering</div>
+      <div class="ch-item" data-ch="dev-chat" onclick="switchChannel(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        dev-chat
+      </div>
+      <div class="ch-item" data-ch="api-updates" onclick="switchChannel(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        api-updates
+        <span class="ch-badge">1</span>
+      </div>
+
+      <div class="ch-section">AI Research</div>
+      <div class="ch-item" data-ch="research" onclick="switchChannel(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        research-papers
+      </div>
+      <div class="ch-item" data-ch="models" onclick="switchChannel(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        model-releases
+      </div>
+
+      <div class="ch-section">Voice</div>
+      <div class="ch-item" onclick="showToast('🔊 Joining Strategy Room...')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        Strategy Room
+      </div>
+      <div class="ch-item" onclick="showToast('🔊 Joining Forge Lab...')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        Forge Lab VC
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="su-avatar">👾</div>
+      <div class="su-info">
+        <div class="su-name">You</div>
+        <div class="su-status">Online</div>
+      </div>
+      <div class="su-actions">
+        <button class="su-act-btn" onclick="showToast('🎙️ Muted')" title="Mute">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        </button>
+        <button class="su-act-btn" onclick="showToast('⚙️ Settings')" title="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Column -->
+  <div class="chat-col" id="chatCol">
+    <div class="chat-head">
+      <div class="ch-head-left">
+        <button class="rail-btn" id="mobileMenuBtn2" style="display:none;margin-right:4px;" onclick="toggleMobileSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="ch-head-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        </div>
+        <!-- Clickable header name shows members -->
+        <div class="ch-head-name-wrap" onclick="openMembersModal()">
+          <div class="ch-head-name" id="chName">announcements</div>
+          <div class="ch-head-topic" id="chTopic">Official updates from the NEUROFORGE team · 247 online</div>
+        </div>
+      </div>
+      <div class="ch-head-right">
+        <!-- Professional CTA Buttons -->
+        <button class="hdr-cta green" onclick="showToast('📊 Opening live analytics...')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <span>Analytics</span>
+        </button>
+        <button class="hdr-cta ghost" onclick="showToast('📅 Schedule synced')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Schedule</span>
+        </button>
+        <button class="hdr-btn" onclick="showToast('🔍 Search messages')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        </button>
+        <button class="hdr-btn" onclick="openMembersModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </button>
+        <button class="hdr-btn" onclick="showToast('📤 Export thread')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="pinned-bar" onclick="showToast('📌 NF-OMEGA v4.1 — 98.7% benchmark. See release notes.')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <strong>Pinned</strong>
+      <span>NF-OMEGA model v4.1 released — 98.7% benchmark score. Read the full release notes →</span>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <div class="typing-row" id="typingRow" style="display:none;">
+      <div class="typing-dots"><i></i><i></i><i></i></div>
+      <span id="typingLabel" style="font-size:11.5px;color:var(--text-400);">NeuroBot is typing...</span>
+    </div>
+
+    <!-- Emoji panel (relative parent is inputBox) -->
+    <div class="input-area">
+      <div class="input-toolbar">
+        <button class="tb-btn" onclick="showToast('📎 Attach file')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05L12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.42 17.41a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </button>
+        <button class="tb-btn" onclick="showToast('📊 Insert chart')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </button>
+        <button class="tb-btn" onclick="showToast('📋 Create poll')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </button>
+        <div class="tb-sep"></div>
+        <button class="tb-btn" onclick="formatBold()" title="Bold"><strong style="font-size:13px;color:var(--text-300);">B</strong></button>
+        <button class="tb-btn" onclick="showToast('</> Code')" title="Code">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </button>
+        <button class="tb-btn" onclick="showToast('🔗 Link')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </button>
+        <div style="flex:1"></div>
+        <button class="tb-btn" style="color:var(--g1)" onclick="showToast('📤 Share Report')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </button>
+      </div>
+
+      <div class="input-box" style="position:relative;" id="inputBox">
+        <div class="input-glow"></div>
+
+        <!-- Emoji panel anchored here -->
+        <div class="emoji-panel" id="emojiPanel">
+          <div class="ep-cats">
+            <button class="ep-cat active" data-cat="smileys">😊 Smileys</button>
+            <button class="ep-cat" data-cat="gestures">👋 Gestures</button>
+            <button class="ep-cat" data-cat="hearts">❤️ Hearts</button>
+            <button class="ep-cat" data-cat="fun">🎉 Fun</button>
+            <button class="ep-cat" data-cat="tech">💻 Tech</button>
+          </div>
+          <div class="ep-grid" id="emojiGrid"></div>
+        </div>
+
+        <div class="input-actions">
+          <button class="ia-btn" id="emojiToggle" onclick="toggleEmoji()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+          </button>
+        </div>
+        <textarea class="msg-textarea" id="msgInput" placeholder="Message #announcements" rows="1"
+          onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <div class="input-actions">
+          <button class="ia-btn" onclick="showToast('🎤 Voice message')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+          </button>
+          <button class="ia-btn" onclick="showToast('📎 Attach')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05L12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.42 17.41a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          </button>
+          <button class="send-btn-main" onclick="sendMessage()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Members Side Panel -->
+  <div class="members-panel" id="membersPanel">
+    <div class="mp-head">Members — <span style="color:var(--g1)">247 online</span></div>
+    <div class="members-list" id="membersList"></div>
+  </div>
+
+</div>
+
+<!-- Members Modal (click header) -->
+<div class="modal-overlay" id="membersModal" onclick="closeMembersModal(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">NEUROFORGE COMMUNITY</div>
+        <div class="modal-sub">Member directory · Active workspace</div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('membersModal').classList.remove('open')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-stats">
+      <div class="modal-stat">
+        <div class="modal-stat-val">1,842</div>
+        <div class="modal-stat-lbl">Total Members</div>
+      </div>
+      <div class="modal-stat">
+        <div class="modal-stat-val">247</div>
+        <div class="modal-stat-lbl">Online Now</div>
+      </div>
+      <div class="modal-stat">
+        <div class="modal-stat-val">12</div>
+        <div class="modal-stat-lbl">Moderators</div>
+      </div>
+    </div>
+    <div class="modal-members" id="modalMemberList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="toastText"></span></div>
+<div id="mobileOverlay" onclick="closeMobileSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:49;backdrop-filter:blur(4px);"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   NEUROFORGE COMMUNITY — INTRO ENGINE (green/teal/cyan palette)
+══════════════════════════════════════════════════════════════ */
+const INTRO_COLORS = {
+  blobs:[
+    {r:0,  g:229, b:176, speed:.00026, phx:0,    phy:1.1,  ox:.09, oy:.07, sz:.30, pk:.38},
+    {r:61, g:240, b:212, speed:.00036, phx:2.1,  phy:3.3,  ox:.07, oy:.09, sz:.22, pk:.25},
+    {r:163,g:255, b:184, speed:.00018, phx:4.2,  phy:.70,  ox:.05, oy:.05, sz:.18, pk:.22},
+    {r:0,  g:180, b:140, speed:.00048, phx:1.1,  phy:2.2,  ox:.04, oy:.03, sz:.12, pk:.30},
+    {r:200,g:255, b:230, speed:.00031, phx:3.5,  phy:1.6,  ox:.03, oy:.04, sz:.10, pk:.18},
+  ],
+};
+
+const iCanvas = document.getElementById('introCanvas');
+const iCtx    = iCanvas.getContext('2d');
+
+let IW,IH,ICX,ICY,IR;
+let pts=[];
+const PCOUNT=500;
+let homes=[];
+
+const clamp01=v=>Math.max(0,Math.min(1,v));
+const eOut3=t=>1-Math.pow(1-t,3);
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+function resizeIntro(){
+  IW=iCanvas.width=window.innerWidth;
+  IH=iCanvas.height=window.innerHeight;
+  ICX=IW/2; ICY=IH/2; IR=Math.min(IW,IH);
+  buildHomes(); seedParticles();
+}
+
+function buildHomes(){
+  homes=[];
+  const cx=ICX,cy=ICY;
+  const markR=IR*.24;
+  const NW=markR*.26,NH=markR*.54,NDR=markR*.032;
+
+  // Outer ring — 220
+  for(let i=0;i<220;i++){
+    const a=(i/220)*Math.PI*2;
+    homes.push({tx:cx+Math.cos(a)*markR,ty:cy+Math.sin(a)*markR});
+  }
+  // N left vertical — 70
+  for(let i=0;i<=70;i++){const t=i/70;homes.push({tx:cx-NW,ty:cy-NH+2*NH*t});}
+  // N right vertical — 70
+  for(let i=0;i<=70;i++){const t=i/70;homes.push({tx:cx+NW,ty:cy-NH+2*NH*t});}
+  // N diagonal — 90
+  for(let i=0;i<=90;i++){const t=i/90;homes.push({tx:cx-NW+2*NW*t,ty:cy-NH+2*NH*t});}
+  // joints
+  [[cx-NW,cy-NH],[cx-NW,cy+NH],[cx+NW,cy-NH],[cx+NW,cy+NH],[cx,cy]].forEach(([jx,jy])=>{
+    for(let i=0;i<8;i++){const a=(i/8)*Math.PI*2;homes.push({tx:jx+Math.cos(a)*NDR,ty:jy+Math.sin(a)*NDR});}
+  });
+  // Inner halo ring
+  for(let i=0;i<60;i++){
+    const a=(i/60)*Math.PI*2;
+    homes.push({tx:cx+Math.cos(a)*markR*.65,ty:cy+Math.sin(a)*markR*.65});
+  }
+}
+
+function seedParticles(){
+  const h=[...homes];
+  for(let i=h.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[h[i],h[j]]=[h[j],h[i]];}
+  pts=[];
+  for(let i=0;i<PCOUNT;i++){
+    const angle=Math.random()*Math.PI*2;
+    const speed=1.8+Math.random()*4.5;
+    const tang=(Math.random()>.5?1:-1)*(.5+Math.random()*2);
+    pts.push({
+      x:ICX,y:ICY,
+      vx:Math.cos(angle)*speed-Math.sin(angle)*tang,
+      vy:Math.sin(angle)*speed+Math.cos(angle)*tang,
+      home:h[i%h.length],
+      r:.4+Math.random()*1.1,
+      hue:155+Math.random()*60,
+      sat:65+Math.random()*30,
+      lit:60+Math.random()*30,
+      alpha:0,maxAlpha:.45+Math.random()*.55,
+      cDelay:Math.random()*.5,
+    });
+  }
+}
+
+function drawBlobs(t,alpha){
+  if(alpha<.005)return;
+  iCtx.save();iCtx.globalCompositeOperation='screen';
+  INTRO_COLORS.blobs.forEach(b=>{
+    const bx=ICX+Math.sin(t*b.speed+b.phx)*b.ox*IR;
+    const by=ICY+Math.sin(t*b.speed*.75+b.phy)*b.oy*IR;
+    const gr=IR*b.sz;
+    const g=iCtx.createRadialGradient(bx,by,0,bx,by,gr);
+    const a0=b.pk*alpha;
+    g.addColorStop(0,`rgba(${b.r},${b.g},${b.b},${a0})`);
+    g.addColorStop(.35,`rgba(${b.r},${b.g},${b.b},${(a0*.5).toFixed(3)})`);
+    g.addColorStop(.7,`rgba(${b.r},${b.g},${b.b},${(a0*.1).toFixed(3)})`);
+    g.addColorStop(1,`rgba(${b.r},${b.g},${b.b},0)`);
+    iCtx.fillStyle=g;iCtx.fillRect(0,0,IW,IH);
+  });
+  iCtx.restore();
+}
+
+function drawVig(){
+  const g=iCtx.createRadialGradient(ICX,ICY,IR*.2,ICX,ICY,IR*.82);
+  g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(1,10,18,.88)');
+  iCtx.fillStyle=g;iCtx.fillRect(0,0,IW,IH);
+}
+
+const CONV_START=2.2,CONV_END=4.6;
+
+function updateDrawParticles(s){
+  // glow pass
+  iCtx.save();iCtx.globalCompositeOperation='screen';
+  pts.forEach(p=>{
+    iCtx.beginPath();
+    iCtx.arc(p.x,p.y,p.r*5,0,Math.PI*2);
+    iCtx.fillStyle=`hsla(${p.hue},${p.sat}%,${p.lit}%,${(p.alpha*.16).toFixed(3)})`;
+    iCtx.fill();
+  });
+  iCtx.restore();
+
+  pts.forEach(p=>{
+    const ct=s-CONV_START-p.cDelay;
+    if(ct<0){
+      const fi=clamp01((s-.2)/.85);
+      p.alpha=Math.min(p.alpha+.014,p.maxAlpha*fi);
+      p.vx*=.9910;p.vy*=.9910;
+      if(s>.85){const dx=ICX-p.x,dy=ICY-p.y,d=Math.sqrt(dx*dx+dy*dy)||1;p.vx+=dx/d*.00022*d;p.vy+=dy/d*.00022*d;}
+      p.x+=p.vx;p.y+=p.vy;
+      p.hue=150+Math.random()*60;p.sat=62+Math.random()*35;p.lit=60+Math.random()*28;
+    } else {
+      const cp=clamp01(ct/(CONV_END-CONV_START));
+      p.hue+=(165-p.hue)*.038;p.sat+=(68-p.sat)*.03;p.lit+=(82-p.lit)*.025;
+      const k=lerp(.016,.058,eOut3(cp));
+      p.vx+=(p.home.tx-p.x)*k;p.vy+=(p.home.ty-p.y)*k;
+      p.vx*=.865;p.vy*=.865;
+      p.x+=p.vx;p.y+=p.vy;
+    }
+    iCtx.beginPath();
+    iCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    iCtx.fillStyle=`hsla(${p.hue},${p.sat}%,${p.lit}%,${p.alpha.toFixed(3)})`;
+    iCtx.fill();
+  });
+}
+
+// Scan lines effect
+function drawScanLines(alpha){
+  if(alpha<.01)return;
+  iCtx.save();iCtx.globalAlpha=0.022*alpha;
+  for(let y=0;y<IH;y+=4){
+    iCtx.fillStyle='rgba(0,0,0,0.5)';
+    iCtx.fillRect(0,y,IW,2);
+  }
+  iCtx.restore();
+}
+
+// Hex grid subtle bg
+function drawHexGrid(alpha){
+  if(alpha<.03)return;
+  const sz=32,a=alpha*.04;
+  iCtx.save();iCtx.strokeStyle=`rgba(0,229,176,${a})`;iCtx.lineWidth=.5;
+  for(let col=0;col<IW/sz+2;col++){
+    for(let row=0;row<IH/sz+2;row++){
+      const x=col*sz*1.5-sz;
+      const y=row*sz*1.732+(col%2)*sz*.866-sz;
+      const s=sz*.5;
+      iCtx.beginPath();
+      for(let i=0;i<6;i++){
+        const a2=Math.PI/3*i;
+        const px=x+Math.cos(a2)*s,py=y+Math.sin(a2)*s;
+        i===0?iCtx.moveTo(px,py):iCtx.lineTo(px,py);
+      }
+      iCtx.closePath();iCtx.stroke();
+    }
+  }
+  iCtx.restore();
+}
+
+/* Timeline */
+const T={
+  phase:'idle',t0:0,s:0,
+  logo:false,rule:false,sub:false,tag:false,bar:false,
+  blobA:0,blobT:0,
+  barStartT:0,fillRunning:false,
+};
+let rafId=null;
+
+function introLoop(now){
+  T.s=(now-T.t0)/1000;
+  iCtx.clearRect(0,0,IW,IH);
+  iCtx.fillStyle='#010a10';iCtx.fillRect(0,0,IW,IH);
+
+  const bgA=clamp01(T.s*.6);
+  drawHexGrid(bgA*.5);
+  drawBlobs(now,T.blobA);
+  updateDrawParticles(T.s);
+  drawScanLines(1);
+  drawVig();
+
+  // blob fade in
+  if(T.s>.3) T.blobA=Math.min(T.blobA+.008,.85);
+
+  // text reveals
+  if(T.s>1.2&&!T.logo){T.logo=true;document.getElementById('introLogo').classList.add('show');}
+  if(T.s>1.55&&!T.rule){T.rule=true;document.getElementById('introRule').classList.add('show');}
+  if(T.s>1.75&&!T.sub){T.sub=true;document.getElementById('introSub').classList.add('show');}
+  if(T.s>2.05&&!T.tag){T.tag=true;document.getElementById('introTag').classList.add('show');
+    document.getElementById('introBar').classList.add('show');}
+
+  // progress bar
+  if(T.s>2.3&&!T.fillRunning){
+    T.fillRunning=true;T.barStartT=T.s;
+    document.getElementById('introBarFill').style.transition='width 2.6s cubic-bezier(.4,0,.2,1)';
+    setTimeout(()=>{document.getElementById('introBarFill').style.width='100%';},20);
+  }
+
+  if(T.s>5.2){
+    const fd=document.getElementById('introFade');
+    fd.style.transition='opacity 1s ease';fd.style.opacity='1';
+    setTimeout(()=>{
+      document.getElementById('introWrap').style.display='none';
+      fd.style.opacity='0';fd.style.transition='opacity .8s ease';
+      document.getElementById('app').classList.add('ready');
+    },950);
+    cancelAnimationFrame(rafId);return;
+  }
+  rafId=requestAnimationFrame(introLoop);
+}
+
+window.addEventListener('resize',resizeIntro);
+resizeIntro();
+T.t0=performance.now();
+rafId=requestAnimationFrame(introLoop);
+
+/* ══════════════════════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════════════════════ */
+const MEMBERS_ALL=[
+  {name:'Marcus Wei',avatar:'👨‍💼',role:'admin',status:'online',title:'CEO, NeuroForge'},
+  {name:'Priya Nair',avatar:'👩‍🔬',role:'mod',status:'online',title:'Head of Research'},
+  {name:'Jordan Cole',avatar:'👨‍💻',role:'mod',status:'online',title:'Lead Engineer'},
+  {name:'Aria Chen',avatar:'👩‍🎨',role:'mod',status:'online',title:'Data Scientist'},
+  {name:'NeuroBot',avatar:'🤖',role:'bot',status:'online',title:'AI Assistant'},
+  {name:'Samira Okafor',avatar:'👩‍💼',role:'',status:'online',title:'Business Analyst'},
+  {name:'Dev Patel',avatar:'👨‍💻',role:'',status:'online',title:'Full Stack Engineer'},
+  {name:'Lin Zhang',avatar:'👩‍🔬',role:'',status:'online',title:'ML Engineer'},
+  {name:'Carlos M.',avatar:'👨‍🎯',role:'',status:'online',title:'Product Manager'},
+  {name:'Nadia K.',avatar:'👩‍💼',role:'',status:'online',title:'Sales Director'},
+  {name:'Alex Stone',avatar:'👨‍💼',role:'',status:'online',title:'Venture Analyst'},
+  {name:'Fatima R.',avatar:'👩‍🎓',role:'',status:'online',title:'Strategy Lead'},
+  {name:'Tom Baxter',avatar:'👨‍🏫',role:'',status:'offline',title:'Research Fellow'},
+  {name:'Elena V.',avatar:'👩‍💻',role:'',status:'offline',title:'Backend Dev'},
+  {name:'Raj S.',avatar:'👨‍🔬',role:'',status:'offline',title:'Data Architect'},
+];
+
+const CHANNELS={
+  announcements:{topic:'Official updates from the NEUROFORGE team · 247 online',msgs:[
+    {id:1,author:'Marcus Wei',avatar:'👨‍💼',role:'admin',time:'Mon at 9:00 AM',
+      text:'Team — Q1 performance exceeded projections by <strong>23%</strong>. The NF-OMEGA v4.1 model achieved <strong>98.7%</strong> on standard benchmarks. Full release notes are live.',
+      reactions:[{e:'🔥',n:18,mine:false},{e:'💯',n:12,mine:false}],
+      analytics:{title:'Q1 Revenue Performance',change:'+23%',up:true,bars:[40,55,48,62,70,68,85,90,82,95,100,88]}},
+    {id:2,author:'Priya Nair',avatar:'👩‍🔬',role:'mod',time:'Mon at 9:45 AM',
+      text:'Research update: our transformer architecture now processes <code>4x</code> throughput at same latency. Paper submitted to NeurIPS 2025. <span class="mention">@developers</span> — API v3 migration guide is ready.',
+      reactions:[{e:'🚀',n:9,mine:false}]},
+    {id:3,author:'NeuroBot',avatar:'🤖',role:'bot',time:'Mon at 10:00 AM',
+      text:'<strong>Weekly digest live.</strong> 247 members online · 1,842 total · 38 new joins this week.',
+      kpis:[{val:'98.7%',lbl:'Model Accuracy',color:'#00e5b0'},{val:'4.1ms',lbl:'Avg Latency',color:'#3df0d4'},{val:'$2.4M',lbl:'ARR Growth',color:'#a3ffb8'}]},
+  ]},
+  analytics:{topic:'Business analytics · KPIs · Dashboards',msgs:[
+    {id:10,author:'Samira Okafor',avatar:'👩‍💼',role:'',time:'Today at 8:15 AM',
+      text:'Q1 dashboard is updated. CAC down <strong>18%</strong>, LTV up <strong>34%</strong>. The new cohort retention model is performing well — 78% 90-day retention.',
+      analytics:{title:'CAC / LTV Trend',change:'+34% LTV',up:true,bars:[55,60,62,65,68,72,75,80,82,85,88,92]}},
+    {id:11,author:'Carlos M.',avatar:'👨‍🎯',role:'',time:'Today at 9:00 AM',
+      text:'Sharing the activation funnel breakdown. Top-of-funnel CTR is at 6.2%, conversion 3.1%, best month since launch. <span class="mention">@Aria Chen</span> can you run churn attribution today?',
+      reactions:[{e:'📊',n:6,mine:false}]},
+    {id:12,author:'Aria Chen',avatar:'👩‍🎨',role:'mod',time:'Today at 9:28 AM',
+      text:'Churn analysis running. Preliminary: enterprise tier retention is <strong>94%</strong>. SMB is <strong>81%</strong>. Looks like onboarding gap at day 14. Flagging for product.',
+      kpis:[{val:'94%',lbl:'Enterprise Retention',color:'#00e5b0'},{val:'81%',lbl:'SMB Retention',color:'#3df0d4'}]},
+  ]},
+  strategy:{topic:'Strategy · Roadmap · Decisions',msgs:[
+    {id:20,author:'Alex Stone',avatar:'👨‍💼',role:'',time:'Today at 8:00 AM',
+      text:'Series B term sheets are in from 3 investors. Valuation range $140M–$175M pre-money. Board call Thursday 2PM EST. <span class="mention">@Marcus Wei</span> please confirm attendance.'},
+    {id:21,author:'Marcus Wei',avatar:'👨‍💼',role:'admin',time:'Today at 8:22 AM',
+      text:'Confirmed on Thursday. <span class="mention">@team</span> — FY2025 OKRs document is live in Drive. Priority shift: enterprise sales motion takes precedence over PLG this quarter.',
+      reactions:[{e:'✅',n:14,mine:false},{e:'💼',n:7,mine:false}]},
+  ]},
+  deals:{topic:'Pipeline · CRM updates · Deal flow',msgs:[
+    {id:30,author:'Nadia K.',avatar:'👩‍💼',role:'',time:'Today at 9:10 AM',
+      text:'Pipeline update: <strong>3 enterprise deals</strong> moved to negotiation stage. TechCorp ($240K ARR) verbal yes, awaiting legal. GlobalAI ($180K) demo Friday.',
+      analytics:{title:'Pipeline by Stage',change:'+3 Deals',up:true,bars:[30,45,55,70,65,80,75,85,90,88,92,95]}},
+    {id:31,author:'Dev Patel',avatar:'👨‍💻',role:'',time:'Today at 9:45 AM',
+      text:'API integration test complete for TechCorp. Sandbox passed all checks. Provisioning their enterprise instance now. ETA: 2 hours.'},
+  ]},
+  general:{topic:'General team discussion',msgs:[
+    {id:40,author:'Lin Zhang',avatar:'👩‍🔬',role:'',time:'Today at 8:30 AM',
+      text:'Good morning team 👋 Anyone attending the AI Summit next week? Would be great to coordinate booth presence.'},
+    {id:41,author:'Fatima R.',avatar:'👩‍💼',role:'',time:'Today at 8:45 AM',
+      text:'Yes! I\'ll be there Tuesday–Wednesday. Have 4 meetings lined up. <span class="mention">@Marcus Wei</span> should we do a pre-brief Monday?'},
+  ]},
+  rules:{topic:'Community guidelines and rules',msgs:[
+    {id:50,author:'Jordan Cole',avatar:'👨‍💻',role:'mod',time:'Jan 1 at 12:00 AM',
+      text:'Welcome to <strong>NEUROFORGE COMMUNITY</strong>. Be professional, stay on-topic, and respect all members. Full guidelines in the pinned document.'},
+  ]},
+  'dev-chat':{topic:'Engineering · Code · PRs',msgs:[
+    {id:60,author:'Dev Patel',avatar:'👨‍💻',role:'',time:'Today at 10:00 AM',
+      text:'PR #847 merged. The inference batch pipeline is now 4x faster. Main impact: average job latency dropped to <code>1.8ms</code>.',reactions:[{e:'🚀',n:5,mine:false}]},
+  ]},
+  'api-updates':{topic:'API changelog and version notes',msgs:[
+    {id:70,author:'Jordan Cole',avatar:'👨‍💻',role:'mod',time:'Today at 7:00 AM',
+      text:'<strong>API v3.1.0 released.</strong> Breaking change: <code>/v2/completions</code> deprecated. Migration to <code>/v3/infer</code> required by May 1. Full changelog pinned.'},
+  ]},
+  research:{topic:'Research papers · Arxiv · Models',msgs:[
+    {id:80,author:'Priya Nair',avatar:'👩‍🔬',role:'mod',time:'Today at 7:30 AM',
+      text:'New paper: "Sparse Activation in Trillion-Parameter Models" — <strong>40% FLOP reduction</strong> with <0.3% accuracy loss. Link in thread.'},
+  ]},
+  models:{topic:'Model releases · Benchmarks · Updates',msgs:[
+    {id:90,author:'Marcus Wei',avatar:'👨‍💼',role:'admin',time:'Today at 9:00 AM',
+      text:'NF-OMEGA v4.1 is live 🎉 Key improvements: 22% faster inference, improved instruction following, and multilingual support for 42 languages.',
+      reactions:[{e:'🎉',n:22,mine:false},{e:'🚀',n:15,mine:false}]},
+  ]},
+};
+
+let currentChannel='announcements';
+let msgIdCounter=200;
+let emojiOpen=false;
+let typingTimeout=null;
+
+const EMOJIS={
+  smileys:['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','😊','😇','🥰','😍','🤩','😎','🤓','🧐','😏','😒','😞'],
+  gestures:['👋','🤚','✋','🖐','👌','✌','🤞','🤟','🤙','👈','👉','👆','👇','☝','👍','👎','👊','✊','🤛','🤜'],
+  hearts:['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💕','💞','💓','💗','💖','💝','💘','💟','❣','💔','♥'],
+  fun:['🎉','🎊','🎈','🎁','🎂','🎆','🎇','🥳','🪅','🎮','🕹','🎲','🎯','🎳','🎰','🃏','🎪','🎭','🎨','🎬'],
+  tech:['💻','🖥','🖨','⌨','🖱','🖲','💾','💿','📀','📱','☎','📟','📠','📡','📺','📷','🔭','🔬','🧪','⚗'],
+};
+
+/* ── Render ── */
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function renderMessages(){
+  const w=document.getElementById('messages');
+  w.innerHTML='';
+  const msgs=CHANNELS[currentChannel].msgs||[];
+  if(!msgs.length) return;
+  w.insertAdjacentHTML('beforeend',`<div class="date-sep"><span>Today</span></div>`);
+  msgs.forEach(m=>appendMsg(m,false));
+}
+
+function appendMsg(m,scroll){
+  const w=document.getElementById('messages');
+  const roleHTML=m.role==='admin'?'<span class="author-badge mod-badge">ADMIN</span>':
+                 m.role==='mod'?'<span class="author-badge mod-badge">MOD</span>':
+                 m.role==='bot'?'<span class="author-badge bot-badge">BOT</span>':'';
+  const authorClass=m.role==='bot'?'msg-author bot':m.role==='mod'||m.role==='admin'?'msg-author mod':'msg-author';
+  const reactHTML=m.reactions?.length?
+    `<div class="msg-reactions">${m.reactions.map(r=>`<button class="reaction${r.mine?' mine':''}" onclick="toggleReact(${m.id},'${r.e}')">${r.e}<span>${r.n}</span></button>`).join('')}</div>`:
+    '';
+
+  // Analytics chart card
+  let analyticsHTML='';
+  if(m.analytics){
+    const maxH=m.analytics.bars.reduce((a,b)=>Math.max(a,b),0);
+    const barsHTML=m.analytics.bars.map((v,i)=>{
+      const h=Math.round((v/maxH)*100);
+      const hl=i===m.analytics.bars.length-1||v===maxH;
+      return `<div class="mac-bar${hl?' highlight':''}" style="height:${h}%"></div>`;
+    }).join('');
+    analyticsHTML=`
+    <div class="msg-analytics-card">
+      <div class="mac-header">
+        <span class="mac-title">${m.analytics.title}</span>
+        <span class="mac-badge ${m.analytics.up?'up':'down'}">${m.analytics.change}</span>
+      </div>
+      <div class="mac-chart">${barsHTML}</div>
+    </div>`;
+  }
+
+  // KPI chips
+  let kpiHTML='';
+  if(m.kpis){
+    const chips=m.kpis.map(k=>`
+      <div class="kpi-chip">
+        <div class="kpi-dot" style="background:${k.color}"></div>
+        <div class="kpi-info">
+          <div class="kpi-val">${k.val}</div>
+          <div class="kpi-lbl">${k.lbl}</div>
+        </div>
+      </div>`).join('');
+    kpiHTML=`<div class="msg-kpi-row">${chips}</div>`;
+  }
+
+  const el=document.createElement('div');
+  el.className=`msg-row${m.mine?' mine':''}`;
+  el.innerHTML=`
+    <div class="msg-avatar">${m.avatar}</div>
+    <div class="msg-body">
+      <div class="msg-meta">
+        <span class="${authorClass}">${m.author}${roleHTML}</span>
+        <span class="msg-time">${m.time}</span>
+      </div>
+      <div class="msg-text">${m.text}</div>
+      ${analyticsHTML}${kpiHTML}${reactHTML}
+    </div>
+    <div class="quick-react">
+      <button class="qr-btn" onclick="quickReact(${m.id},'👍')">👍</button>
+      <button class="qr-btn" onclick="quickReact(${m.id},'🔥')">🔥</button>
+      <button class="qr-btn" onclick="quickReact(${m.id},'📊')">📊</button>
+      <button class="qr-btn" onclick="quickReact(${m.id},'✅')">✅</button>
+    </div>`;
+  w.appendChild(el);
+  if(scroll)setTimeout(()=>{w.scrollTop=w.scrollHeight;},40);
+}
+
+function renderChannels(){
+  document.querySelectorAll('.ch-item[data-ch]').forEach(el=>{
+    el.classList.toggle('active',el.dataset.ch===currentChannel);
+  });
+}
+
+function renderMembers(){
+  const online=MEMBERS_ALL.filter(m=>m.status==='online');
+  const offline=MEMBERS_ALL.filter(m=>m.status==='offline');
+  const w=document.getElementById('membersList');
+  w.innerHTML='';
+  w.insertAdjacentHTML('beforeend',`<div class="member-section">Online — ${online.length}</div>`);
+  online.forEach(m=>{w.insertAdjacentHTML('beforeend',memberRowHTML(m,true));});
+  w.insertAdjacentHTML('beforeend',`<div class="member-section">Offline — ${offline.length}</div>`);
+  offline.forEach(m=>{w.insertAdjacentHTML('beforeend',memberRowHTML(m,false));});
+}
+
+function memberRowHTML(m,on){
+  const rb=m.role==='admin'||m.role==='mod'?`<span class="m-role-badge mod">${m.role.toUpperCase()}</span>`:
+           m.role==='bot'?'<span class="m-role-badge bot">BOT</span>':'';
+  return `<div class="member-row">
+    <div class="m-avatar">${m.avatar}<div class="m-status-dot${on?'':' offline'}"></div></div>
+    <span class="m-name${on?' online-name':''}">${m.name}</span>${rb}
+  </div>`;
+}
+
+/* Members Modal */
+function openMembersModal(){
+  const modal=document.getElementById('membersModal');
+  const list=document.getElementById('modalMemberList');
+  list.innerHTML='';
+  const online=MEMBERS_ALL.filter(m=>m.status==='online');
+  const offline=MEMBERS_ALL.filter(m=>m.status==='offline');
+  list.insertAdjacentHTML('beforeend','<div class="modal-section-title">Online</div>');
+  online.forEach(m=>{
+    const bb=m.role==='admin'||m.role==='mod'?`<span class="mm-badge mod">${m.role.toUpperCase()}</span>`:
+             m.role==='bot'?'<span class="mm-badge bot">BOT</span>':'';
+    list.insertAdjacentHTML('beforeend',`
+      <div class="modal-member-row">
+        <div class="mm-avatar">${m.avatar}<div class="mm-dot"></div></div>
+        <div><div class="mm-name">${m.name}</div><div class="mm-role">${m.title}</div></div>
+        ${bb}
+      </div>`);
+  });
+  list.insertAdjacentHTML('beforeend','<div class="modal-section-title">Offline</div>');
+  offline.forEach(m=>{
+    list.insertAdjacentHTML('beforeend',`
+      <div class="modal-member-row">
+        <div class="mm-avatar">${m.avatar}<div class="mm-dot offline"></div></div>
+        <div><div class="mm-name" style="color:var(--text-300)">${m.name}</div><div class="mm-role">${m.title}</div></div>
+      </div>`);
+  });
+  modal.classList.add('open');
+}
+
+function closeMembersModal(e){
+  if(e.target===document.getElementById('membersModal'))
+    document.getElementById('membersModal').classList.remove('open');
+}
+
+/* Channel switch */
+function switchChannel(el){
+  const ch=el.dataset.ch;
+  if(!CHANNELS[ch]){showToast('🔒 Coming soon');return;}
+  currentChannel=ch;
+  el.querySelector('.ch-badge')?.remove();
+  renderChannels();
+  document.getElementById('chName').textContent=ch;
+  document.getElementById('chTopic').textContent=CHANNELS[ch].topic;
+  document.getElementById('msgInput').placeholder=`Message #${ch}`;
+  renderMessages();
+  setTimeout(()=>{const w=document.getElementById('messages');w.scrollTop=w.scrollHeight;},60);
+  if(window.innerWidth<=720)closeMobileSidebar();
+}
+
+/* Send message */
+function sendMessage(){
+  const inp=document.getElementById('msgInput');
+  const text=inp.value.trim();if(!text)return;
+  const now=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const msg={id:++msgIdCounter,author:'You',avatar:'👾',role:'pro',
+    time:`Today at ${now}`,text:esc(text),mine:true,reactions:[]};
+  if(!CHANNELS[currentChannel].msgs)CHANNELS[currentChannel].msgs=[];
+  CHANNELS[currentChannel].msgs.push(msg);
+  appendMsg(msg,true);inp.value='';autoResize(inp);closeEmoji();
+
+  clearTimeout(typingTimeout);
+  const tr=document.getElementById('typingRow');tr.style.display='flex';
+  const names=['NeuroBot','Marcus Wei','Priya Nair','Aria Chen','Samira Okafor'];
+  document.getElementById('typingLabel').textContent=`${names[Math.floor(Math.random()*names.length)]} is typing...`;
+  setTimeout(()=>{document.getElementById('messages').scrollTop=document.getElementById('messages').scrollHeight;},40);
+
+  const REPLIES=[
+    'Great insight. Syncing the data team now. <span class="mention">@analytics</span>',
+    'Agreed — flagging this for the roadmap. <code>TASK-2847</code> created.',
+    '📊 Running the model now. Will have results within the hour.',
+    'Solid point. This aligns with the Q2 strategy memo.',
+    'On it. Will update the dashboard by EOD. <span class="mention">@team</span>',
+    'Noted. Looping in <span class="mention">@Dev Patel</span> for the technical implementation.',
+    '✅ Confirmed. Deal moved to negotiation stage in the CRM.',
+    'Benchmarks look strong. Sharing the full report shortly. 📈',
+    'Valid concern — scheduling a sync for tomorrow 10AM EST.',
+  ];
+
+  typingTimeout=setTimeout(()=>{
+    tr.style.display='none';
+    const reply={id:++msgIdCounter,
+      author:names[Math.floor(Math.random()*names.length)],
+      avatar:['🤖','👨‍💼','👩‍🔬','👩‍🎨','👩‍💼'][Math.floor(Math.random()*5)],
+      role:Math.random()>.85?'bot':'',
+      time:`Today at ${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`,
+      text:REPLIES[Math.floor(Math.random()*REPLIES.length)],
+      reactions:[]};
+    CHANNELS[currentChannel].msgs.push(reply);
+    appendMsg(reply,true);
+  },2200);
+}
+
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,140)+'px';}
+
+/* Reactions */
+function quickReact(id,emoji){
+  const msg=CHANNELS[currentChannel].msgs.find(m=>m.id===id);if(!msg)return;
+  const ex=msg.reactions.find(r=>r.e===emoji);
+  if(ex){ex.n++;ex.mine=true;}else msg.reactions.push({e:emoji,n:1,mine:true});
+  renderMessages();showToast(`Reacted ${emoji}`);
+}
+function toggleReact(id,emoji){
+  const msg=CHANNELS[currentChannel].msgs.find(m=>m.id===id);if(!msg)return;
+  const ex=msg.reactions.find(r=>r.e===emoji);
+  if(ex){if(ex.mine){ex.n--;ex.mine=false;if(ex.n<=0)msg.reactions=msg.reactions.filter(r=>r.e!==emoji);}else{ex.n++;ex.mine=true;}}
+  renderMessages();
+}
+
+/* Emoji */
+function buildEmojiGrid(cat){
+  const grid=document.getElementById('emojiGrid');grid.innerHTML='';
+  (EMOJIS[cat]||[]).forEach(e=>{
+    const btn=document.createElement('button');btn.className='ep-emoji';btn.textContent=e;
+    btn.onclick=()=>insertEmoji(e);grid.appendChild(btn);
+  });
+}
+function toggleEmoji(){emojiOpen=!emojiOpen;document.getElementById('emojiPanel').classList.toggle('open',emojiOpen);if(emojiOpen)buildEmojiGrid('smileys');}
+function closeEmoji(){emojiOpen=false;document.getElementById('emojiPanel').classList.remove('open');}
+function insertEmoji(e){const inp=document.getElementById('msgInput');const pos=inp.selectionStart;inp.value=inp.value.slice(0,pos)+e+inp.value.slice(pos);inp.setSelectionRange(pos+e.length,pos+e.length);inp.focus();}
+document.querySelectorAll('.ep-cat').forEach(btn=>{btn.onclick=function(){document.querySelectorAll('.ep-cat').forEach(b=>b.classList.remove('active'));this.classList.add('active');buildEmojiGrid(this.dataset.cat);};});
+
+/* Mobile sidebar */
+function toggleMobileSidebar(){
+  const sb=document.getElementById('sidebar'),ov=document.getElementById('mobileOverlay');
+  if(sb.classList.toggle('open')){ov.style.display='block';}else{ov.style.display='none';}
+}
+function closeMobileSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('mobileOverlay').style.display='none';}
+
+/* Channel search */
+document.getElementById('channelSearch').addEventListener('input',function(){
+  const v=this.value.toLowerCase();
+  document.querySelectorAll('.ch-item').forEach(el=>{el.style.display=(el.dataset.ch||'').includes(v)?'flex':'none';});
+});
+
+/* Format */
+function formatBold(){
+  const inp=document.getElementById('msgInput');const s=inp.selectionStart,e=inp.selectionEnd;
+  if(s!==e){const sel=inp.value.slice(s,e);inp.value=inp.value.slice(0,s)+'**'+sel+'**'+inp.value.slice(e);}
+  else{inp.value+='****';inp.setSelectionRange(inp.value.length-2,inp.value.length-2);}
+  inp.focus();
+}
+
+/* Mobile check */
+function checkMobile(){
+  const mb1=document.getElementById('mobileMenuBtn');
+  const mb2=document.getElementById('mobileMenuBtn2');
+  const show=window.innerWidth<=720;
+  if(mb1)mb1.style.display=show?'flex':'none';
+  if(mb2)mb2.style.display=show?'flex':'none';
+}
+window.addEventListener('resize',checkMobile);checkMobile();
+
+/* Global close */
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.emoji-panel')&&!e.target.closest('#emojiToggle'))closeEmoji();
+});
+
+/* Toast */
+let toastT;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toastText').textContent=msg;
+  t.classList.add('show');clearTimeout(toastT);
+  toastT=setTimeout(()=>t.classList.remove('show'),2100);
+}
+
+/* Init */
+renderMessages();renderMembers();renderChannels();buildEmojiGrid('smileys');
+setTimeout(()=>{const w=document.getElementById('messages');w.scrollTop=w.scrollHeight;},100);
+</script>
+</body>
+</html>
